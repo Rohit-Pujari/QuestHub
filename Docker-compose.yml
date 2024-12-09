@@ -1,0 +1,49 @@
+services:
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: QuestHub-Frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./Frontend:/app
+      - /app/node_modules
+
+  # auth:
+  #   build:
+  #     context: ./BackendAuth
+  #     dockerfile: Dockerfile
+  #   container_name: QuestHub-Auth
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - DJANGO_SECRET_KEY=/Secrets/DJANGO_SECRET_KEY.key
+  #     - JWT_PRIVATE_KEY=/Secrets/private.key
+  #     - JWT_PUBLIC_KEY=/Secrets/public.key
+  #   volumes:
+  #     - ./BackendAuth:/app
+  #     - ./Secrets:/Secrets:ro
+  #   depends_on:
+  #     AuthDB:
+  #       condition: service_healthy
+    
+  AuthDB:
+    image: mysql
+    container_name: QuestHub-AuthDB
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: QuestHubAuth
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpassword
+    volumes:
+      - ./DB/AuthDB:/var/lib/mysql
+    healthcheck:
+     test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+     interval: 10s
+     timeout: 5s
+     retries: 5
+
+  

@@ -1,3 +1,18 @@
 .git
 *.code-workspace
 QuestHub.code-workspace
+# Ignore everything in the db/Authdb folder
+DB/Authdb/*
+
+# Allow only the database data files
+!DB/AuthDB/*.ibd
+!DB/AuthDB/*.frm
+!DB/AuthDB/*.MYD
+!DB/AuthDB/*.MYI
+!DB/AuthDB/QuestHubAuth
+
+# Ignore logs, temp files, and other artifacts
+DB/AuthDB/*.log
+DB/AuthDB/*.tmp
+DB/AuthDB/auto.cnf
+DB/AuthDB/#sql*
