@@ -5,10 +5,13 @@ services:
       dockerfile: Dockerfile
     container_name: QuestHub-Frontend
     ports:
-      - "5173:5173"
+      - "4173:4173"
     volumes:
       - ./Frontend:/app
       - /app/node_modules
+      - /app/dist
+    environment:
+      - VITE_AUTH_API_URL=http://QuestHub-Auth:8000/auth/
 
   auth:
     build:

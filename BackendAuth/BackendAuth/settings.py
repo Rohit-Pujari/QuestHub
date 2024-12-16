@@ -54,8 +54,10 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 # this is related to CORS 
-CORS_ORIGIN_ALLOW_ALL = True
-
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
 # this is related to all auth
 AUTHENTICATION_BACKENDS = [
     # Needed to login by username in Django admin, regardless of `allauth`

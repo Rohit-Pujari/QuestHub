@@ -3,6 +3,9 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 from .serializers import RegisterationSerializer, LoginSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import get_user_model
+
+UserModel = get_user_model()
 
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -76,3 +79,29 @@ class LogoutView(APIView):
         response = Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
         response.delete_cookie('refresh_token')
         return response
+    
+class CheckUsernameView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        username = request.GET.get('username',None)
+        if username:
+            try:
+                user = UserModel.objects.get(username=username)
+                return Response({"exists": True}, status=status.HTTP_200_OK)
+            except UserModel.DoesNotExist:
+                return Response({"exists": False}, status=status.HTTP_200_OK)
+        return Response({"error": "Invalid username"}, status=status.HTTP_400_BAD_REQUEST)
+
+class CheckEmailView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        email = request.GET.get('email',None)
+        if email:
+            try:
+                user = UserModel.objects.get(email=email)
+                return Response({"exists": True}, status=status.HTTP_200_OK)
+            except UserModel.DoesNotExist:
+                return Response({"exists": False}, status=status.HTTP_200_OK)
+        return Response({"error": "Invalid username"}, status=status.HTTP_400_BAD_REQUEST)

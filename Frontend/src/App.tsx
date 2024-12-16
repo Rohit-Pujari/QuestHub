@@ -1,36 +1,18 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import NavBar from "./components/NavBar";
-import "./index.css";
-import Home from "./pages/Home";
-import About from "./pages/About";
-import Features from "./pages/Features";
-import Contact from "./pages/Contact";
+import NavBar from "./components/NavBar/NavBar";
+import Router, { routes } from "./Router";
+import { AlertProvider } from "./context/Alert/AlertContext";
+import GlobalAlert from "./context/Alert/GlobalAlert";
 
 function App() {
-  interface NavLink {
-    name: string;
-    path: string;
-    element: React.FC;
-  }
-
-  const navLinks: NavLink[] = [
-    { name: "Home", path: "/", element: Home},
-    { name: "About", path: "/about", element: About},
-    { name: "Features", path: "/features", element: Features },
-    { name: "Contact", path: "/contact", element: Contact},
-  ];
-
   return (
-    <BrowserRouter>
-      {/* Pass navLinks as prop to NavBar */}
-      <NavBar navLinks={navLinks} />
-      <Routes>
-        {/* Define routes for each path */}
-        {navLinks.map(navLink => (
-          <Route key={navLink.path} path={navLink.path} element={<navLink.element />}/>
-        ))}
-      </Routes>
-    </BrowserRouter>
+    <>
+      <AlertProvider>
+        <Router>
+          <NavBar navLinks={routes.filter((link) => link.showInNav)} />
+          <GlobalAlert />
+        </Router>
+      </AlertProvider>
+    </>
   );
 }
 

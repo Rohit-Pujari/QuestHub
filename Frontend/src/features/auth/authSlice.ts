@@ -1,19 +1,23 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface AuthState{
+export interface AuthState{
     user:{username:string | null};
     token:{
         access_token:string | null,
-        refresh_token:string | null,
     };
     isAuthenticated:boolean;
+}
+
+interface LoginPayload{
+    user:{username:string | null};
+    token:{access_token:string | null};
 }
 
 const authState = localStorage.getItem('Auth')
 
 const initialState:AuthState = authState ? JSON.parse(authState) : {
     user:{username:null},
-    token:{access_token:null,refresh_token:null},
+    token:{access_token:null},
     isAuthenticated:false
 }
 
@@ -21,7 +25,7 @@ const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-        login(state,action){
+        login(state,action: PayloadAction<LoginPayload>){
             state.user = action.payload.user;
             state.token = action.payload.token;
             state.isAuthenticated = true;
@@ -30,7 +34,7 @@ const authSlice = createSlice({
         logout(state){
             localStorage.removeItem('Auth');
             state.user = {username:null};
-            state.token = {access_token:null,refresh_token:null};
+            state.token = {access_token:null};
             state.isAuthenticated = false;
         }
     }
