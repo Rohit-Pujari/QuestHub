@@ -1,4 +1,20 @@
 services:
+  api-gateway:
+    build:
+      context: ./APIGateway
+      dockerfile: Dockerfile
+    container_name: QuestHub-APIGateway
+    ports:
+      - "3000:3000"
+    environment:
+      - AUTH_SERVICE_URL=http://QuestHub-Auth:8000/auth/
+      - JWT_PUBLIC_KEY=/Secrets/public.key
+    volumes:
+      - ./APIGateway:/app
+      - ./Secrets:/Secrets:ro
+    depends_on:
+      - auth-service
+
   frontend:
     build:
       context: ./Frontend
@@ -11,9 +27,9 @@ services:
       - /app/node_modules
       - /app/dist
     environment:
-      - VITE_AUTH_API_URL=http://QuestHub-Auth:8000/auth/
+      - VITE_API_URL=http://QuestHub-APIGateway:8000/auth/
 
-  auth:
+  auth-service:
     build:
       context: ./BackendAuth
       dockerfile: Dockerfile
