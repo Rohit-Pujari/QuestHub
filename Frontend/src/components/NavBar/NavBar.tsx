@@ -20,7 +20,7 @@ interface INavBar {
 
 const NavBar: React.FC<INavBar> = ({ navLinks }) => {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { auth } = useSelector((state: { auth: RootState }) => state.auth);
+  const { user,isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   const navigate = useNavigate();
 
@@ -55,10 +55,10 @@ const NavBar: React.FC<INavBar> = ({ navLinks }) => {
       </div>
       <div className="hidden md:flex gap-2">
         {/* if user is logged in */}
-        {auth?.user?.username && (
+        {user?.username && (
           <>
             <p className="font-semibold hover:text-indigo-400 transition duration-300">
-              {auth.user.username}
+              {user.username}
             </p>
             <Button
               type="button"
@@ -72,7 +72,7 @@ const NavBar: React.FC<INavBar> = ({ navLinks }) => {
           </>
         )}
         {/* if user is not logged in */}
-        {!auth?.isAuthenticated && (
+        {!isAuthenticated && (
           <>
             <Button
               type="button"
@@ -107,7 +107,7 @@ const NavBar: React.FC<INavBar> = ({ navLinks }) => {
             style="flex flex-col items-start p-4 space-y-4 text-sm font-medium hover:text-indigo-400 transition duration-300"
           />
           <div className="flex gap-2 items-start">
-            {!auth.isAuthenticated && (
+            {!isAuthenticated && (
               <>
                 <Button
                   type="button"

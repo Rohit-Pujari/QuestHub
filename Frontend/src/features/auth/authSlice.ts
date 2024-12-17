@@ -13,9 +13,8 @@ interface LoginPayload{
     token:{access_token:string | null};
 }
 
-const authState = localStorage.getItem('Auth')
 
-const initialState:AuthState = authState ? JSON.parse(authState) : {
+const initialState:AuthState={
     user:{username:null},
     token:{access_token:null},
     isAuthenticated:false
