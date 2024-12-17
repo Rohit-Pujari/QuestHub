@@ -1,5 +1,5 @@
 import NavBar from "./components/NavBar/NavBar";
-import Router, { routes } from "./Router";
+import Router from "./Router";
 import { AlertProvider } from "./context/Alert/AlertContext";
 import GlobalAlert from "./context/Alert/GlobalAlert";
 
@@ -8,7 +8,7 @@ function App() {
     <>
       <AlertProvider>
         <Router>
-          <NavBar navLinks={routes.filter((link) => link.showInNav)} />
+          <NavBar />
           <GlobalAlert />
         </Router>
       </AlertProvider>
