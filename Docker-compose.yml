@@ -1,4 +1,18 @@
 services:
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: QuestHub-Frontend
+    ports:
+      - "4173:4173"
+    volumes:
+      - ./Frontend:/app
+      - /app/node_modules
+      - /app/dist
+    environment:
+      - VITE_API_URL=http://QuestHub-APIGateway:8000/auth/
+  
   api-gateway:
     build:
       context: ./APIGateway
@@ -14,20 +28,6 @@ services:
       - ./Secrets:/Secrets:ro
     depends_on:
       - auth-service
-
-  frontend:
-    build:
-      context: ./Frontend
-      dockerfile: Dockerfile
-    container_name: QuestHub-Frontend
-    ports:
-      - "4173:4173"
-    volumes:
-      - ./Frontend:/app
-      - /app/node_modules
-      - /app/dist
-    environment:
-      - VITE_API_URL=http://QuestHub-APIGateway:8000/auth/
 
   auth-service:
     build:
@@ -46,7 +46,7 @@ services:
     depends_on:
       AuthDB:
         condition: service_healthy
-    
+          
   AuthDB:
     image: mysql
     container_name: QuestHub-AuthDB
@@ -65,4 +65,25 @@ services:
      timeout: 5s
      retries: 5
 
+  post-service:
+    build:
+      context: ./Services/Post
+      dockerfile: Dockerfile
+    container_name: QuestHub-Post
+    ports:
+      - "8001:8001"
+    environment:
+      - POST_DATABASE_URL=mongodb://QuestHub-PostDB:27017/QuestHub-Post
+    volumes:
+      - ./Services/Post:/app
   
+  PostDB:
+    image: mongo
+    container_name: QuestHub-PostDB
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    volumes:
+      - ./DB/PostDB:/data/db
