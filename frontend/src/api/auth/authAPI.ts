@@ -16,7 +16,7 @@ const loginAPI = async (username: string, password: string) => {
             "password": password
         }
         const response = await authAPI.post("login/", payload);
-        return response.data;
+        return response;
     } catch (error) {
         throw error;
     }
@@ -31,7 +31,7 @@ const registerAPI = async (username: string,email: string, password: string,conf
             "confirm_password": confirmPassword
         }
         const response = await authAPI.post("register/", payload);
-        return response.data;
+        return response;
     } catch (error) {
         throw error;
     }
@@ -39,8 +39,8 @@ const registerAPI = async (username: string,email: string, password: string,conf
 
 const checkUsernameAPI = async (username: string) => {
     try {  
-        const response = await authAPI.get(`check-username/${username}`);
-        return response.data;
+        const response = await authAPI.get(`check-username/?username=${username}`);
+        return response;
     } catch (error) {
         throw error;
     }
@@ -48,8 +48,8 @@ const checkUsernameAPI = async (username: string) => {
 
 const checkEmailAPI = async (email: string) => {
     try {  
-        const response = await authAPI.get(`check-email/${email}`);
-        return response.data;
+        const response = await authAPI.get(`check-email/?email=${email}`);
+        return response;
     } catch (error) {
         throw error;
     }

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar/Navbar";
 import Sidebar from "./Sidebar/Sidebar";
 import AppProvider from "./AppProvider";
+import GlobalAlert from "@/context/GlobalAlert";
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -52,6 +53,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             className={`flex-1 p-4 ${isDarkMode ? "text-white" : "text-black"}`}
             onClick={() => isSidebarOpen && setIsSidebarOpen(false)}
           >
+            <GlobalAlert/>
             {children}
           </main>
         </div>
