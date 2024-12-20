@@ -1,4 +1,5 @@
 const express = require('express')
+const cors = require('cors')
 const {createProxyMiddleware} = require('http-proxy-middleware');
 const jwt = require('jsonwebtoken');
 const fs = require('fs')
@@ -22,6 +23,12 @@ const authenticateRequest = (req, res,next) =>{
     });
 }
 
+app.use(cors({
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true, 
+    }))
+
 app.use(
     '/auth',
     createProxyMiddleware({
@@ -36,4 +43,4 @@ app.get('/', (req, res) => {
 
 
 
-app.listen(3000, () => console.log('API Gateway listening on port 3000!'))
+app.listen(3001, () => console.log('API Gateway listening on port 3000!'))
