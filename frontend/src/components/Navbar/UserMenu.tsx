@@ -5,12 +5,29 @@ import { faUser, faCog, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/store";
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
+import { logoutAPI } from "@/api/auth/authAPI";
+import { useAlert } from "@/context/AlertContext";
 
 const UserMenu: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { setAlert } = useAlert();
   const router = useRouter(); // Initialize useRouter
+  const handleLogout = async () => {
+    try {
+      const response = await logoutAPI();
+      if (response.status === 200) {
+        setIsMenuOpen(false);
+        localStorage.removeItem("Auth");
+        router.push("/login");
+        setAlert({ type: "success", message: "Logged out successfully" });
+        return;
+      }
+    }catch (error) {
+      setAlert({ type: "error", message: "An error occurred" });
+    }
+  }
 
   // Close the menu when clicking outside of it
   useEffect(() => {
@@ -28,7 +45,6 @@ const UserMenu: React.FC = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  console.log(isAuthenticated)
   return isAuthenticated ? (
     <div className="relative">
       <button
@@ -48,7 +64,7 @@ const UserMenu: React.FC = () => {
             <li className="px-4 py-2 hover:bg-gray-600 cursor-pointer flex items-center">
               <FontAwesomeIcon icon={faCog} className="mr-2" /> Settings
             </li>
-            <li className="px-4 py-2 hover:bg-gray-600 cursor-pointer flex items-center">
+            <li onClick={handleLogout} className="px-4 py-2 hover:bg-gray-600 cursor-pointer flex items-center">
               <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" /> Logout
             </li>
           </ul>

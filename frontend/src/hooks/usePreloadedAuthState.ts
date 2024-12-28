@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 const usePreloadedAuthState = () => {
   const [preloadedAuthState, setPreloadedAuthState] = useState({
-    user: { username: null },
+    user: { username: null ,id: null },
     token: null,
     isAuthenticated: false,
   });

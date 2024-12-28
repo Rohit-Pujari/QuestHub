@@ -39,14 +39,14 @@ const Form: React.FC<FormProps> = ({ fields, onSubmit, children, className, titl
             id={field.name}
             placeholder={field.placeholder}
             required={field.required}
-            className="w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300"
+            className="w-full border text-black border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300"
           />
         </div>
       ))}
+      {children}
       <button type="submit" className="bg-indigo-600 text-white py-2 rounded-md text-lg font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300">
         Submit
       </button>
-      {children}
     </form>
   );
 };

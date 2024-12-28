@@ -25,17 +25,17 @@ const Login: React.FC = () => {
         try {
             const response = await loginAPI(data.username, data.password);
             if (response.status === 200) {
-                const { username, token }: { username: string, token: string } = response.data;
+                const { username,id, token }: { username: string,id:string, token: string } = response.data;
                 const storeState = {
                     user: {
                         username: username,
+                        id: id
                     },
                     token: token,
-                    isAuthenticated: true
                 };
                 // Convert the storeState object to a JSON string before storing
                 localStorage.setItem("Auth", JSON.stringify(storeState));
-                router.push("/home"); // Redirect to a protected route after login
+                router.push("/posts"); // Redirect to a protected route after login
                 dispatch(login(storeState));
                 return;
             } else {

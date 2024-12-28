@@ -37,7 +37,7 @@ class LoginView(APIView):
         if serializer.is_valid():
             user = serializer.validated_data
             refresh = RefreshToken.for_user(user)
-            response = Response({"username": user.username, "access_token": str(refresh.access_token)}, status=status.HTTP_200_OK)
+            response = Response({"username": user.username,"id": user.id, "access_token": str(refresh.access_token)}, status=status.HTTP_200_OK)
             response.set_cookie(
                 key='refresh_token',
                 value=str(refresh),
@@ -105,3 +105,20 @@ class CheckEmailView(APIView):
             except UserModel.DoesNotExist:
                 return Response({"exists": False}, status=status.HTTP_200_OK)
         return Response({"error": "Invalid username"}, status=status.HTTP_400_BAD_REQUEST)
+    
+class GetUserInfo(APIView):
+    permission_classes = [permissions.AllowAny]
+    def get(self, request):
+        user = request.GET.get('userId',None)
+        if user:
+            try:
+                user = UserModel.objects.get(id=user)
+                user_data = {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,  # Include other fields if required
+                }
+            except UserModel.DoesNotExist:
+                return Response({"exists": False}, status=status.HTTP_200_OK)
+        
+        return Response({"user": user_data}, status=status.HTTP_200_OK)

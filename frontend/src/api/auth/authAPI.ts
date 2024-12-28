@@ -37,6 +37,15 @@ const registerAPI = async (username: string,email: string, password: string,conf
     }
 }
 
+const logoutAPI = async () => {
+    try {
+        const response = await authAPI.post("logout/");
+        return response;
+    } catch (error) {
+        throw error;
+    }
+}
+
 const checkUsernameAPI = async (username: string) => {
     try {  
         const response = await authAPI.get(`check-username/?username=${username}`);
@@ -55,4 +64,4 @@ const checkEmailAPI = async (email: string) => {
     }
 }
 
-export { loginAPI, registerAPI, checkUsernameAPI, checkEmailAPI };
+export { loginAPI, registerAPI, checkUsernameAPI, checkEmailAPI, logoutAPI };

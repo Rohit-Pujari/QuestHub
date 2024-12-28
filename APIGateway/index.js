@@ -27,8 +27,9 @@ app.use(cors({
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true, 
-    }))
+}))
 
+// Auth Service
 app.use(
     '/auth',
     createProxyMiddleware({
@@ -37,10 +38,19 @@ app.use(
     })
 )
 
+// Post Service
+app.use(
+    '/graphql',
+    createProxyMiddleware({
+        target: process.env.POST_SERVICE_URL,
+        changeOrigin: true,
+    })
+)
+
+
 app.get('/', (req, res) => {
     res.send("API GateWay Running")
 })
-
 
 
 app.listen(3001, () => console.log('API Gateway listening on port 3000!'))

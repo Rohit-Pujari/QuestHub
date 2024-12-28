@@ -32,7 +32,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       document.documentElement.classList.remove("dark");
     }
   }, [isDarkMode]);
-
   return (
     <AppProvider>
       <div className="h-screen flex flex-col bg-white dark:bg-gray-900 dark:text-white">

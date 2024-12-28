@@ -20,6 +20,7 @@ services:
       - "3001:3001"
     environment:
       - AUTH_SERVICE_URL=http://QuestHub-Auth:8000/auth/
+      - POST_SERVICE_URL=http://QuestHub-Post:8001/graphql/
       - JWT_PUBLIC_KEY=/Secrets/public.key
     volumes:
       - ./APIGateway:/app
@@ -71,9 +72,12 @@ services:
     ports:
       - "8001:8001"
     environment:
-      - POST_DATABASE_URL=mongodb://QuestHub-PostDB:27017/QuestHub-Post
+      - POST_DATABASE_URL=mongodb://root:root@QuestHub-PostDB:27017/QuestHub-Post?authSource=admin
+      - API_URL=http://QuestHub-APIGateway:3001
     volumes:
       - ./Services/Post:/app
+    depends_on:
+      - PostDB
   
   PostDB:
     image: mongo
