@@ -1,67 +1,44 @@
 import axios from "axios";
 
-const baseURL = process.env.API_URL?`${process.env.API_URL}/auth/` : "http://localhost:3001/auth/";
+const base_url = process.env.API_URL
+  ? `${process.env.API_URL}auth`
+  : "http://localhost:3001/auth";
 
-const authAPI = axios.create({baseURL,
-    headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-    }
-})
+const authAPI = axios.create({ baseURL: base_url, withCredentials: true });
 
 const loginAPI = async (username: string, password: string) => {
-    try {
-        const payload = {
-            "username": username,
-            "password": password
-        }
-        const response = await authAPI.post("login/", payload);
-        return response;
-    } catch (error) {
-        throw error;
-    }
-}
+  const payload = {
+    username: username,
+    password: password,
+  };
+  return await authAPI.post("/login/", payload);
+};
 
-const registerAPI = async (username: string,email: string, password: string,confirmPassword: string) => {
-    try {
-        const payload = {
-            "username": username,
-            "email": email,
-            "password": password,
-            "confirm_password": confirmPassword
-        }
-        const response = await authAPI.post("register/", payload);
-        return response;
-    } catch (error) {
-        throw error;
-    }
-}
+const signUpAPI = async (
+  username: string,
+  email: string,
+  password: string,
+  confirm_password: string
+) => {
+  const payload = {
+    username: username,
+    email: email,
+    password: password,
+    confirm_password: confirm_password,
+  };
+  return await authAPI.post("/register/", payload);
+};
 
 const logoutAPI = async () => {
-    try {
-        const response = await authAPI.post("logout/");
-        return response;
-    } catch (error) {
-        throw error;
-    }
-}
+  return await authAPI.post("/logout/");
+};
 
-const checkUsernameAPI = async (username: string) => {
-    try {  
-        const response = await authAPI.get(`check-username/?username=${username}`);
-        return response;
-    } catch (error) {
-        throw error;
-    }
-}
+const checkUserNameAPI = async (username: string) => {
+  return await authAPI.get(`/check-username/?username=${username}`);
+};
 
 const checkEmailAPI = async (email: string) => {
-    try {  
-        const response = await authAPI.get(`check-email/?email=${email}`);
-        return response;
-    } catch (error) {
-        throw error;
-    }
-}
+  return await authAPI.get(`/check-email/?email=${email}`);
+};
 
-export { loginAPI, registerAPI, checkUsernameAPI, checkEmailAPI, logoutAPI };
+export { loginAPI, signUpAPI, logoutAPI, checkUserNameAPI, checkEmailAPI };

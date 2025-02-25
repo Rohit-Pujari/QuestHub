@@ -19,10 +19,20 @@ class RegisterView(APIView):
                     "username": user.username,
                     "email": user.email,  # Include other fields if required
                 }
-                return Response(
-                    {"user": user_data, "message": "User registered successfully"},
-                    status=status.HTTP_201_CREATED
+                refresh = RefreshToken.for_user(user)
+                response = Response(
+                    {"user": user_data,"token":str(refresh.access_token), "message": "User registered successfully"},
+                    status=status.HTTP_200_OK
                 )
+                response.set_cookie(
+                    key='Auth_token',
+                    value=str(refresh),
+                    secure=True,
+                    httponly=True,
+                    samesite="Strict",
+                    expires=30*24*60*60,
+                )
+                return response
             except Exception as e:
                 return Response(
                     {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -37,9 +47,14 @@ class LoginView(APIView):
         if serializer.is_valid():
             user = serializer.validated_data
             refresh = RefreshToken.for_user(user)
-            response = Response({"username": user.username,"id": user.id, "access_token": str(refresh.access_token)}, status=status.HTTP_200_OK)
+            userdata = {
+                "id": user.id,
+                "username": user.username,
+                "profilePicture": user.profile_picture
+            }
+            response = Response({"user": userdata, "token": str(refresh.access_token)}, status=status.HTTP_200_OK)
             response.set_cookie(
-                key='refresh_token',
+                key='Auth_token',
                 value=str(refresh),
                 secure=True,
                 httponly=True,
@@ -54,14 +69,14 @@ class RefreshAccessTokenView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        refresh_token = request.COOKIES.get('refresh_token')
+        refresh_token = request.COOKIES.get('Auth_token')
         if refresh_token:
             try:
                 refresh = RefreshToken(refresh_token)
                 access_token = str(refresh.access_token)
-                response = Response({"access_token": access_token}, status=status.HTTP_200_OK)
+                response = Response({"token": access_token}, status=status.HTTP_200_OK)
                 response.set_cookie(
-                    key='refresh_token',
+                    key='Auth_token',
                     value=str(refresh),
                     secure=True,
                     httponly=True,
@@ -77,7 +92,7 @@ class LogoutView(APIView):
     
     def post(self, request):
         response = Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
-        response.delete_cookie('refresh_token')
+        response.delete_cookie('Auth_token')
         return response
     
 class CheckUsernameView(APIView):
@@ -109,16 +124,18 @@ class CheckEmailView(APIView):
 class GetUserInfo(APIView):
     permission_classes = [permissions.AllowAny]
     def get(self, request):
-        user = request.GET.get('userId',None)
-        if user:
-            try:
-                user = UserModel.objects.get(id=user)
-                user_data = {
-                    "id": user.id,
-                    "username": user.username,
-                    "email": user.email,  # Include other fields if required
-                }
-            except UserModel.DoesNotExist:
-                return Response({"exists": False}, status=status.HTTP_200_OK)
+        userid = request.GET.get('userId',None)
+        if not userid:
+            return Response({"error":"userId is Required"},status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = UserModel.objects.get(id=userid)
+            user_data = {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "profile_picture":user.profile_picture
+            }
+            return Response({"user": user_data}, status=status.HTTP_200_OK)
+        except UserModel.DoesNotExist:
+            return Response({"exists": False}, status=status.HTTP_404_NOT_FOUND)
         
-        return Response({"user": user_data}, status=status.HTTP_200_OK)

@@ -1,16 +1,18 @@
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: QuestHub-Frontend
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-    environment:
-      - API_URL=http://QuestHub-APIGateway:3001/
-  
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: QuestHub-Frontend
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./frontend:/app
+  #   environment:
+  #     - API_URL=http://QuestHub-APIGateway:3001/
+  #   depends_on:
+  #     - api-gateway
+
   api-gateway:
     build:
       context: ./APIGateway
@@ -45,7 +47,7 @@ services:
     depends_on:
       AuthDB:
         condition: service_healthy
-          
+
   AuthDB:
     image: mysql
     container_name: QuestHub-AuthDB
@@ -59,10 +61,10 @@ services:
     volumes:
       - ./DB/AuthDB:/var/lib/mysql
     healthcheck:
-     test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-     interval: 10s
-     timeout: 5s
-     retries: 5
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   post-service:
     build:
@@ -74,11 +76,14 @@ services:
     environment:
       - POST_DATABASE_URL=mongodb://root:root@QuestHub-PostDB:27017/QuestHub-Post?authSource=admin
       - API_URL=http://QuestHub-APIGateway:3001
+      - CACHE_HOST=QuestHub-Cache
+      - CACHE_PORT=6379
     volumes:
       - ./Services/Post:/app
     depends_on:
       - PostDB
-  
+      - Cache
+
   PostDB:
     image: mongo
     container_name: QuestHub-PostDB
@@ -89,3 +94,17 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: root
     volumes:
       - ./DB/PostDB:/data/db
+
+  Cache:
+    image: redis:latest
+    container_name: QuestHub-Cache
+    ports:
+      - "6379:6379"
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - ./cahe:/data"
+
+volumes:
+  cahe:
+    driver: local
