@@ -105,7 +105,7 @@ const resolvers = {
     ) => {
       try {
         const commentIds = (
-          await Comment.find({ on: postId }, "_id")
+          await Comment.find({ associatedTo: postId }, "_id")
             .skip(skip)
             .limit(limit)
             .lean()
