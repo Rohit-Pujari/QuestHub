@@ -5,6 +5,7 @@ const typeDefs = `
     username: String!
     email: String!
     profile_picture: String
+    isFollowed:Boolean!
   }
   type Post {
     id: ID!
@@ -40,6 +41,11 @@ const typeDefs = `
     on: String!
     dislikedBy: User
   }
+  type Follow {
+    id: ID!
+    follower: User
+    following: User
+  }
   type Query {
     getPosts(limit: Int!, skip: Int, userId: ID!): [Post!]!
     getPost(postId: ID!, userId: ID!): Post!
@@ -61,6 +67,8 @@ const typeDefs = `
       limit: Int!
       skip: Int
     ): [Comment!]!
+    getFollowers(userId: ID!,limit:Int!,skip:Int): [User!]!
+    getFollowing(userId: ID!,limit:Int!,skip:Int): [User!]!
   }
   type Mutation {
     createPost(
@@ -70,20 +78,22 @@ const typeDefs = `
       createdBy: ID!
     ): Post!
     updatePost(
-      id: ID!
+      postId: ID!
       userId: ID!
       title: String!
       content: String!
       mediaUrl: String
     ): Post!
-    deletePost(id: ID!, userId: ID!): String!
+    deletePost(postId: ID!, userId: ID!): String!
     createComment(content: String!, parentId: ID, createdBy: ID!,associatedTo:ID!): Comment!
-    updateComment(id: ID!, userId: ID!, content: String!): Comment!
-    deleteComment(id: ID!, userId: ID!): String!
-    like(on: ID!, likedBy: ID!): Like!
-    dislike(on: ID!, dislikedBy: ID!): Dislike!
-    undoLike(on: ID!, userId: ID!): String!
-    undoDislike(on: ID!, userId: ID!): String!
+    updateComment(commentId: ID!, userId: ID!, content: String!): Comment!
+    deleteComment(commentId: ID!, userId: ID!): String!
+    like(on: ID!, likedBy: ID!): String!
+    dislike(on: ID!, dislikedBy: ID!): String!
+    undoLike(on: ID!, likedBy: ID!): String!
+    undoDislike(on: ID!, dislikedBy: ID!): String!
+    follow(follower: ID!, following: ID!): String!
+    unfollow(follower: ID!, following: ID!): String!
   }
 `;
 

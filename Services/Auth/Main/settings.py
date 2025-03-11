@@ -60,7 +60,7 @@ SITE_ID = 1
 # this is related to CORS 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
+    "http://localhost:3000",
 ]
 # this is related to all auth
 AUTHENTICATION_BACKENDS = [

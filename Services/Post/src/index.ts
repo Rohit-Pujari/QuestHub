@@ -2,8 +2,8 @@ import { ApolloServer } from "@apollo/server";
 import typeDefs from "./graphql/schema";
 import { connectDB } from "./config/db";
 import { startStandaloneServer } from "@apollo/server/standalone";
-import resolvers from "./graphql/resolvers/index";
 import { cacheClient } from "./config/cache";
+import resolvers from "./graphql/resolvers";
 
 // connect the database and Cache Servers before starting the service
 connectDB();

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { IUser } from "../types";
 
 const baseURL = process.env.API_URL
   ? `${process.env.API_URL}/auth/`
@@ -7,18 +8,12 @@ const baseURL = process.env.API_URL
 const authAPI = axios.create({ baseURL });
 
 // Function to fetch user information
-export const getUserInfo = async (
-  Id: string
-): Promise<{
-  id: string;
-  username: string;
-  email: string;
-  profile_picture: string;
-} | null> => {
+export const getUserInfo = async (Id: string): Promise<IUser | null> => {
   try {
     if (Id) {
       const response = await authAPI.get(`user-info/?userId=${Id}`);
       if (response.data?.user) {
+        response.data.user.isFollowed = false;
         return response.data.user;
       }
       return null; // User not found in response
