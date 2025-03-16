@@ -1,4 +1,4 @@
-import { Comment, Post } from "../../../../models";
+import { Comment, Dislike, Like, Post } from "../../../../models";
 
 const addComment = async (
   postId: string,
@@ -22,6 +22,8 @@ const addComment = async (
       associatedTo: postId,
       createdBy: { id: userId },
       parentId: parentId,
+      likeCount: 0,
+      dislikeCount: 0,
     });
     return comment.save();
   } catch (err) {
@@ -50,6 +52,13 @@ const removeComment = async (id: string) => {
     if (!deletedComment) {
       throw new Error("Comment not found");
     }
+    const deleteLikesDislikes =
+      (await Like.deleteMany({ on: id })) &&
+      (await Dislike.deleteMany({ on: id }));
+    if (!deleteLikesDislikes)
+      throw new Error(
+        "Failed to delete likes and dislikes for the post which got deleted"
+      );
     return "Comment deleted successfully";
   } catch (err) {
     throw new Error("Failed to delete comment");

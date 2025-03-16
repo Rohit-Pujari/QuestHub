@@ -4,14 +4,13 @@ import {
   faUserAlt,
   IconDefinition,
 } from "@fortawesome/free-solid-svg-icons";
-import { title } from "process";
 
 interface SideBarItem {
   title: string;
   icon: IconDefinition;
   link: string;
 }
-export const SideBarItems = [
+export const SideBarItems: SideBarItem[] = [
   {
     title: "Home",
     icon: faHome,

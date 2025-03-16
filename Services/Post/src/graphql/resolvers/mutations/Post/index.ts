@@ -1,4 +1,4 @@
-import { Post } from "../../../../models/index";
+import { Comment, Dislike, Like, Post } from "../../../../models/index";
 import { IPost } from "../../../../types";
 
 const addPost = async (
@@ -13,6 +13,8 @@ const addPost = async (
       content: content,
       mediaUrl: mediaUrl,
       createdBy: { id: userId },
+      likeCount: 0,
+      dislikeCount: 0,
     });
     return post.save();
   } catch (err) {
@@ -44,6 +46,13 @@ const removePost = async (id: string) => {
     if (!deletedPost) {
       throw new Error("Post not found");
     }
+    const deleteLikesDislikes =
+      (await Like.deleteMany({ on: id })) &&
+      (await Comment.deleteMany({ on: id }));
+    if (!deleteLikesDislikes)
+      throw new Error(
+        "Failed to delete likes and dislikes for the post which got deleted"
+      );
     return "Post deleted successfully";
   } catch (err) {
     throw new Error("Failed to delete post");

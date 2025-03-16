@@ -12,10 +12,13 @@ const addPostCache = async (post: IPost): Promise<IPost> => {
       mediaUrl: post.mediaUrl,
       createdBy: post.createdBy,
       createdAt: post.createdAt,
+      likeCount: post.likeCount,
+      dislikeCount: post.dislikeCount,
     };
     const success = await cacheClient.set(
       cachePost.id,
-      JSON.stringify(cachePost)
+      JSON.stringify(cachePost),
+      { EX: 60 }
     );
     if (!success) {
       throw new Error("Error adding post to cache");
@@ -44,6 +47,8 @@ const getPostCache = async (postId: string): Promise<IPost> => {
       mediaUrl: parsedPost.mediaUrl,
       createdBy: parsedPost.createdBy,
       createdAt: parsedPost.createdAt,
+      likeCount: parsedPost.likeCount,
+      dislikeCount: parsedPost.dislikeCount,
     };
     return response;
   } catch (err) {

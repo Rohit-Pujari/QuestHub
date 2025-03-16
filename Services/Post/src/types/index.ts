@@ -14,8 +14,8 @@ export interface IPost {
   content: string;
   mediaUrl?: string;
   createdBy: IUser;
-  likeCount?: number;
-  dislikeCount?: number;
+  likeCount: number;
+  dislikeCount: number;
   createdAt: DateTime;
   likedByUser?: boolean;
   dislikedByUser?: boolean;
@@ -27,8 +27,8 @@ export interface IComment {
   parentId?: string;
   associatedTo: string;
   createdBy: IUser;
-  likeCount?: number;
-  dislikeCount?: number;
+  likeCount: number;
+  dislikeCount: number;
   createdAt: DateTime;
   likedByUser?: boolean;
   dislikedByUser?: boolean;

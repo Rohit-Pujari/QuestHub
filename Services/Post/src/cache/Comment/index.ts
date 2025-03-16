@@ -11,10 +11,15 @@ const addCommentCache = async (comment: IComment): Promise<IComment> => {
       associatedTo: comment.associatedTo,
       createdBy: comment.createdBy,
       createdAt: comment.createdAt,
+      likeCount: comment.likeCount,
+      dislikeCount: comment.dislikeCount,
     };
     const success = await cacheClient.set(
       cacheComment.id,
-      JSON.stringify(cacheComment)
+      JSON.stringify(cacheComment),
+      {
+        EX: 60,
+      }
     );
     if (!success) {
       throw new Error("Error adding comment to cache");
@@ -42,6 +47,8 @@ const getCommentCache = async (commentId: string): Promise<IComment> => {
       associatedTo: parsedComment.associatedTo,
       createdBy: parsedComment.createdBy,
       createdAt: parsedComment.createdAt,
+      likeCount: parsedComment.likeCount,
+      dislikeCount: parsedComment.dislikeCount,
     };
     return response;
   } catch (err) {

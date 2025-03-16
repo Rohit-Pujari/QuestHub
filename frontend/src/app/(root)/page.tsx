@@ -1,46 +1,69 @@
+'use client'
 import postAPI from "@/api/post/postAPI";
+import InfiniteScroll from "@/components/InfinteScroll";
 import ListPosts from "@/components/ListPosts";
-import Link from "next/link";
+import { useAlert } from "@/lib/context/AlertContext";
+import { RootState } from "@/lib/store";
+import { IPost } from "@/types";
+import { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 
-export default async function Home() {
-  try {
-    const payload = {
-      query: `
-        query {
-          getPosts(limit: 10, skip: 0) {
+export default function Home() {
+  const [hasMore, setHasMore] = useState(true);
+  const [posts, setPosts] = useState<IPost[]>([])
+  const pageRef = useRef(1);
+  const user = useSelector((state: RootState) => state.auth.user);
+  const { setAlert } = useAlert()
+  if (!user) return null
+  const loadPosts = async () => {
+    if (!hasMore) return;
+    try {
+      const payload = {
+        query: `query getPosts($userId: ID!,$skip:Int,$limit:Int!){
+        getPosts(userId:$userId,skip:$skip,limit:$limit){
+          id
+          title
+          content
+          mediaUrl
+          createdAt
+          createdBy{
             id
-            title
-            createdAt
-            createdBy {
-              username
-            }
-            mediaUrl
+            username
+            email
+            profile_picture
+            isFollowed
           }
+          likeCount
+          dislikeCount
+          likedByUser
+          dislikedByUser
         }
+      }
       `,
-    };
-
-    const response = await postAPI.post("/", payload);
-    const posts = response?.data?.data?.getPosts;
-    // const posts = [{ title: 'Test', id: '1', createdAt: '10/2/2024', createdBy: { username: 'User' }, mediaUrl: '' }]
-
-    return (
-      <div>
-        {posts?.map((post: { id: string; title: string; createdAt: string; createdBy: { username: string; }; mediaUrl: string; }) => (
-          <Link key={post.id} href={`post/${post.id}`}>
-            <ListPosts
-              id={post.id}
-              title={post.title}
-              createdAt={post.createdAt}
-              createdBy={post.createdBy.username}
-              mediaUrl={post.mediaUrl}
-            />
-          </Link>
-        ))}
-      </div>
-    );
-  } catch (err) {
-    console.error("Error fetching posts:", err);
-    return <div>Error loading posts.</div>;
+        variables: {
+          userId: user.id,
+          skip: (pageRef.current - 1) * 10,
+          limit: 10
+        }
+      }
+      const response = await postAPI.post("/", payload);
+      const newPosts = response.data?.data?.getPosts || [];
+      setPosts((prev) => [...prev, ...newPosts]);
+      setHasMore(newPosts.length > 0);
+      pageRef.current += 1;
+    } catch (err) {
+      console.log();
+      setAlert({ message: "Error Occured", type: "error" })
+    }
   }
+  useEffect(() => {
+    if (user?.id) {
+      loadPosts()
+    }
+  }, [user?.id])
+  return (
+    <InfiniteScroll fetchMoreData={loadPosts} hasMore={hasMore}>
+      <ListPosts posts={posts} />
+    </InfiniteScroll>
+  )
 }

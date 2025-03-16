@@ -51,20 +51,6 @@ const getPostsWithDetails = async (
       string,
       IUser
     >;
-    const likeCount = await Like.aggregate([
-      { $match: { on: { $in: postIds } } },
-      { $group: { _id: "$on", count: { $sum: 1 } } },
-    ]);
-    const dislikeCount = await Dislike.aggregate([
-      { $match: { on: { $in: postIds } } },
-      { $group: { _id: "$on", count: { $sum: 1 } } },
-    ]);
-    const likeMap = new Map(
-      likeCount.map((like) => [like._id, like.count])
-    ) as Map<string, number>;
-    const dislikeMap = new Map(
-      dislikeCount.map((dislike) => [dislike._id, dislike.count])
-    ) as Map<string, number>;
     const userLikes = await Like.find({
       likedBy: userId,
       on: { $in: postIds },
@@ -89,8 +75,8 @@ const getPostsWithDetails = async (
         mediaUrl: post.mediaUrl,
         createdBy: createdBy,
         createdAt: post.createdAt,
-        likeCount: likeMap.get(post.id) || 0,
-        dislikeCount: dislikeMap.get(post.id) || 0,
+        likeCount: post.likeCount,
+        dislikeCount: post.dislikeCount,
         likedByUser: likedPosts.has(post.id),
         dislikedByUser: dislikedPosts.has(post.id),
       };

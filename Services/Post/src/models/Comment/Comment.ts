@@ -21,6 +21,14 @@ const commentSchema = new mongoose.Schema(
         required: true,
       },
     },
+    likeCount: {
+      type: Number,
+      required: true,
+    },
+    dislikeCount: {
+      type: Number,
+      required: true,
+    },
   },
   {
     timestamps: true,

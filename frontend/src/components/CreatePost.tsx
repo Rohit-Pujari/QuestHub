@@ -2,28 +2,51 @@
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux';
 import TextEditor from './TextEditor';
-import { useAlert } from '@/lib/context/AlertContext';
 import { RootState } from '@/lib/store';
 import postAPI from '@/api/post/postAPI';
+import FileUpload from './FileUpload';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import { useAlert } from '@/lib/context/AlertContext';
 
 interface CreatePostProps {
 }
 const CreatePost: React.FC<CreatePostProps> = ({ }) => {
-    const [title, setTiltle] = useState('Your Post Title')
-    const [content, setContent] = useState('Your Post Content')
-    const { auth } = useSelector((state: RootState) => state)
-    const { user } = auth
+    const [title, setTiltle] = useState('')
+    const [content, setContent] = useState('')
+    const [progress, setProgress] = useState<number>(0)
+    const [file, setFile] = useState<File | null>(null)
+    const user = useSelector((state: RootState) => state.auth.user)
+    const navigate = useRouter()
+    const { setAlert } = useAlert()
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        if (title === '' || content === '') {
+            setAlert({ message: 'Please fill all the fields', type: 'error' })
+            return
+        }
         const userid = user?.id
+        let fileurl = ''
         if (userid) {
             try {
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('file', file!);
+                    formData.append('type', 'Posts/');
+                    const fileUpload = await axios.post('/api/cdn', formData, {
+                        onUploadProgress: (progressEvent) => {
+                            if (progressEvent.progress) setProgress(progressEvent.progress)
+                        },
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    })
+                    fileurl = fileUpload.data.fileUrl
+                }
                 const payload = {
                     query: `
-                        mutation CreatePost($title: String!, $content: String!, $createdBy: String!) {
-                            createPost(title: $title, content: $content, createdBy: $createdBy) {
+                        mutation CreatePost($title: String!, $content: String!, $createdBy: ID!, $mediaUrl: String) {
+                            createPost(title: $title, content: $content, createdBy: $createdBy,mediaUrl: $mediaUrl) {
                                 id
-                                title
                             }
                         }
                     `,
@@ -31,23 +54,30 @@ const CreatePost: React.FC<CreatePostProps> = ({ }) => {
                         title,
                         content,
                         createdBy: userid,
+                        mediaUrl: fileurl,
                     },
                 };
+                console.log(payload.variables);
                 const response = await postAPI.post('/', payload)
-                console.log('success', response);
+                if (response.status === 200) {
+                    navigate.push(`/post/${response.data.data.createPost.id}`)
+                    return
+                } else {
+                    setAlert({ message: 'Failed to create post', type: 'error' })
+                }
             } catch (err) {
-                console.log(err);
+                setAlert({ message: 'Failed to create post', type: 'error' })
             }
         }
     }
     return (
         <form
             onSubmit={handleSubmit}
-            className='flex flex-col bg-white border border-gray-300 rounded-lg shadow-lg p-6'
+            className='flex flex-col gap-2 bg-white border border-gray-300 rounded-lg shadow-lg p-6'
         >
             <h1 className="text-2xl font-semibold text-gray-800 mb-4 text-center">Create Post</h1>
             <section className="flex flex-col mb-4">
-                <label htmlFor='title' className="text-sm text-gray-600 mb-1">Title</label>
+                <label htmlFor='title' className="text-lg font-semibold text-gray-600 mb-1">Title</label>
                 <input
                     type="text"
                     name="title"
@@ -57,7 +87,11 @@ const CreatePost: React.FC<CreatePostProps> = ({ }) => {
                     className="w-full border text-black border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300"
                 />
             </section>
-            <TextEditor content={content} setContent={setContent} />
+            <section className='flex flex-col mb-4'>
+                <label className='text-lg text-gray-600 font-semibold mb-1'>Content</label>
+                <TextEditor content={content} setContent={setContent} />
+            </section>
+            <FileUpload progress={progress} setFile={setFile} />
             <button type="submit" className="bg-indigo-600 text-white py-2 rounded-md text-lg font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300">
                 Submit
             </button>

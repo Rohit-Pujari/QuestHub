@@ -56,20 +56,6 @@ const getCommentsWithDetails = async (
       string,
       IUser
     >;
-    const likeCount = await Like.aggregate([
-      { $match: { on: { $in: commentIds } } },
-      { $group: { _id: "$on", count: { $sum: 1 } } },
-    ]);
-    const dislikeCount = await Dislike.aggregate([
-      { $match: { on: { $in: commentIds } } },
-      { $group: { _id: "$on", count: { $sum: 1 } } },
-    ]);
-    const likeMap = new Map(
-      likeCount.map((like) => [like._id, like.count])
-    ) as Map<string, number>;
-    const dislikeMap = new Map(
-      dislikeCount.map((dislike) => [dislike._id, dislike.count])
-    ) as Map<string, number>;
     const userLikes = await Like.find({
       likedBy: userId,
       on: { $in: commentIds },
@@ -94,8 +80,8 @@ const getCommentsWithDetails = async (
         parentId: comment.parentId,
         createdAt: comment.createdAt,
         associatedTo: comment.associatedTo,
-        likeCount: likeMap.get(comment.id) || 0,
-        dislikeCount: dislikeMap.get(comment.id) || 0,
+        likeCount: comment.likeCount,
+        dislikeCount: comment.dislikeCount,
         likedByUser: likedComments.has(comment.id),
         dislikedByUser: dislikedComments.has(comment.id),
       };

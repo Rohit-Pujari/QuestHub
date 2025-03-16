@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`overflow-hidden ${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`bg-black overflow-hidden ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AppProvider>
           {children}

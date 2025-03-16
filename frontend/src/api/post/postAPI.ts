@@ -6,7 +6,6 @@ const base_url = process.env.API_URL
 
 const postAPI = axios.create({
   baseURL: base_url,
-  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },

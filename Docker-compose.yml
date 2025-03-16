@@ -103,7 +103,7 @@ services:
     restart: always
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
-      - ./cahe:/data"
+      - ./cache:/data"
 
 volumes:
   cahe:

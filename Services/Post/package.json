@@ -13,6 +13,7 @@
   "dependencies": {
     "@apollo/server": "^4.11.3",
     "axios": "^1.7.9",
+    "bullmq": "^5.43.1",
     "cors": "^2.8.5",
     "dataloader": "^2.2.3",
     "dotenv": "^16.4.7",

@@ -1,5 +1,4 @@
 import SignUp from '@/components/SignUp'
-import GlobalAlert from '@/lib/context/GlobalAlert'
 import React from 'react'
 
 const SignUpPage = () => {

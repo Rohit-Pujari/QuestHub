@@ -10,7 +10,9 @@ const addUserCache = async (user: IUser): Promise<IUser> => {
       email: user.email,
       profile_picture: user.profile_picture,
     };
-    const success = await cacheClient.set(user.id, JSON.stringify(cacheUser));
+    const success = await cacheClient.set(user.id, JSON.stringify(cacheUser), {
+      EX: 60,
+    });
     if (!success) {
       throw new Error("Error adding user to cache");
     }

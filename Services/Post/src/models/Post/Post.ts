@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import { IPost } from "../../types";
-
 const postSchema = new mongoose.Schema(
   {
     title: {
@@ -19,6 +18,14 @@ const postSchema = new mongoose.Schema(
         type: String,
         required: true,
       },
+    },
+    likeCount: {
+      type: Number,
+      required: true,
+    },
+    dislikeCount: {
+      type: Number,
+      required: true,
     },
   },
   { timestamps: true }
