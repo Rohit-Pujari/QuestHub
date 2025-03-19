@@ -1,9 +1,9 @@
 'use client';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux';
 import TextEditor from './TextEditor';
 import { RootState } from '@/lib/store';
-import postAPI from '@/api/post/postAPI';
+import { createPostAPI } from '@/api/post/postAPI';
 import FileUpload from './FileUpload';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -42,25 +42,10 @@ const CreatePost: React.FC<CreatePostProps> = ({ }) => {
                     })
                     fileurl = fileUpload.data.fileUrl
                 }
-                const payload = {
-                    query: `
-                        mutation CreatePost($title: String!, $content: String!, $createdBy: ID!, $mediaUrl: String) {
-                            createPost(title: $title, content: $content, createdBy: $createdBy,mediaUrl: $mediaUrl) {
-                                id
-                            }
-                        }
-                    `,
-                    variables: {
-                        title,
-                        content,
-                        createdBy: userid,
-                        mediaUrl: fileurl,
-                    },
-                };
-                console.log(payload.variables);
-                const response = await postAPI.post('/', payload)
-                if (response.status === 200) {
-                    navigate.push(`/post/${response.data.data.createPost.id}`)
+
+                const id = await createPostAPI(title, content, userid, fileurl)
+                if (id) {
+                    navigate.push(`/post/${id}`)
                     return
                 } else {
                     setAlert({ message: 'Failed to create post', type: 'error' })
@@ -70,6 +55,18 @@ const CreatePost: React.FC<CreatePostProps> = ({ }) => {
             }
         }
     }
+    useEffect(() => {
+        setTiltle('')
+        setContent('')
+        setProgress(0)
+        setFile(null)
+        return () => {
+            setTiltle('')
+            setContent('')
+            setProgress(0)
+            setFile(null)
+        }
+    }, [])
     return (
         <form
             onSubmit={handleSubmit}

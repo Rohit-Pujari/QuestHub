@@ -36,3 +36,4 @@ class LoginSerializer(serializers.Serializer):
             else:
                 raise serializers.ValidationError("Invalid Credentials")
         raise serializers.ValidationError("Provide Username and Password")
+    

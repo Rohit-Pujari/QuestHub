@@ -1,5 +1,5 @@
 'use client'
-import postAPI from "@/api/post/postAPI";
+import { getPostsAPI } from "@/api/post/postAPI";
 import InfiniteScroll from "@/components/InfinteScroll";
 import ListPosts from "@/components/ListPosts";
 import { useAlert } from "@/lib/context/AlertContext";
@@ -16,49 +16,30 @@ export default function Home() {
   const { setAlert } = useAlert()
   if (!user) return null
   const loadPosts = async () => {
-    if (!hasMore) return;
+    if (!hasMore || !user?.id) return;
+
     try {
-      const payload = {
-        query: `query getPosts($userId: ID!,$skip:Int,$limit:Int!){
-        getPosts(userId:$userId,skip:$skip,limit:$limit){
-          id
-          title
-          content
-          mediaUrl
-          createdAt
-          createdBy{
-            id
-            username
-            email
-            profile_picture
-            isFollowed
-          }
-          likeCount
-          dislikeCount
-          likedByUser
-          dislikedByUser
-        }
+      const skip = (pageRef.current - 1) * 10;
+      const newPosts = await getPostsAPI(user.id, skip);
+
+      if (newPosts?.length) {
+        setPosts((prev) => [...prev, ...newPosts.filter((p) => !prev.some((prevPost) => prevPost.id === p.id))]);
+        setHasMore(newPosts.length > 1);
+        pageRef.current += 1;
       }
-      `,
-        variables: {
-          userId: user.id,
-          skip: (pageRef.current - 1) * 10,
-          limit: 10
-        }
-      }
-      const response = await postAPI.post("/", payload);
-      const newPosts = response.data?.data?.getPosts || [];
-      setPosts((prev) => [...prev, ...newPosts]);
-      setHasMore(newPosts.length > 0);
-      pageRef.current += 1;
     } catch (err) {
-      console.log();
-      setAlert({ message: "Error Occured", type: "error" })
+      setAlert({ message: "Error Occurred", type: "error" });
     }
-  }
+  };
+
   useEffect(() => {
+    setPosts([])
+    pageRef.current = 1
     if (user?.id) {
       loadPosts()
+    }
+    return () => {
+      setPosts([])
     }
   }, [user?.id])
   return (

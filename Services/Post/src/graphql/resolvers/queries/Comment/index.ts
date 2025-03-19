@@ -39,8 +39,8 @@ const getCommentsWithDetails = async (
       ...new Set(comments.map((comment) => comment.createdBy.id)),
     ];
     const follows = await Follow.find({
-      follower: userId,
-      following: { $in: userIds },
+      "follower.id": userId,
+      "following.id": { $in: userIds },
     });
     const followedUsers = follows.map((follow) => follow.following.id);
     const userInfo = await Promise.all(

@@ -1,4 +1,5 @@
 import {
+  faAdd,
   faHome,
   faMessage,
   faUserAlt,
@@ -17,9 +18,9 @@ export const SideBarItems: SideBarItem[] = [
     link: "/",
   },
   {
-    title: "Profile",
-    icon: faUserAlt,
-    link: "/profile",
+    title: "create post",
+    icon: faAdd,
+    link: "/post/create-post",
   },
   {
     title: "Messages",

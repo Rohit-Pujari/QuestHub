@@ -10,6 +10,7 @@ import { addFollow, removeFollow } from "./mutations/Follow";
 import { addLike, removeLike } from "./mutations/Like";
 import { addPost, removePost, updatePost } from "./mutations/Post";
 import { getCommentsWithDetails } from "./queries/Comment";
+import { getFollowersID, getFollowingID } from "./queries/Follow";
 import { getPost, getPostsWithDetails } from "./queries/Post";
 
 const resolvers = {
@@ -22,8 +23,8 @@ const resolvers = {
         const post = await getPost(postId);
         const userInfo: IUser = await getUserCache(post.createdBy.id);
         const isFollowed = (await Follow.exists({
-          follower: userId,
-          following: post.createdBy.id,
+          follower: { id: userId },
+          following: { id: post.createdBy.id },
         }))
           ? true
           : false;
@@ -139,11 +140,88 @@ const resolvers = {
     },
     getFollowers: async (
       _: any,
-      { userId, limit, skip }: { userId: string; limit: number; skip: number }
+      {
+        profileId,
+        userId,
+        limit,
+        skip,
+      }: { profileId: string; userId: string; limit: number; skip?: number }
     ) => {
       try {
+        const followerIds = [
+          ...new Set(await getFollowersID(profileId, limit, skip)),
+        ];
+        const userFollows = [...new Set(await getFollowingID(userId))];
+        const response = followerIds.map(async (id) => {
+          const userInfo = await getUserCache(id);
+          userInfo.isFollowed = userFollows.includes(id);
+          return userInfo;
+        });
+        return response;
       } catch (err) {
         throw new Error("Error fetching followers");
+      }
+    },
+    getFollowing: async (
+      _: any,
+      {
+        profileId,
+        userId,
+        limit,
+        skip,
+      }: { profileId: string; userId: string; limit: number; skip?: number }
+    ) => {
+      try {
+        const followerIds = [
+          ...new Set(await getFollowersID(profileId, limit, skip)),
+        ];
+        const userFollows = [...new Set(await getFollowingID(userId))];
+        const response = followerIds.map(async (id) => {
+          const userInfo = await getUserCache(id);
+          userInfo.isFollowed = userFollows.includes(id);
+          return userInfo;
+        });
+        return response;
+      } catch (err) {
+        throw new Error("Error fetching followers");
+      }
+    },
+    getFollowersCount: async (_: any, { profileId }: { profileId: string }) => {
+      try {
+        const followerCount: number =
+          (await Follow.find({
+            following: { id: profileId },
+          }).countDocuments()) || 0;
+        return followerCount;
+      } catch (err) {
+        throw new Error("Error fetching followers count");
+      }
+    },
+    getFollowingCount: async (_: any, { profileId }: { profileId: string }) => {
+      try {
+        const followingCount: number =
+          (await Follow.find({
+            follower: { id: profileId },
+          }).countDocuments()) || 0;
+        return followingCount;
+      } catch (err) {
+        throw new Error("Error fetching following count");
+      }
+    },
+    isFollowed: async (
+      _: any,
+      { follower, following }: { follower: string; following: string }
+    ) => {
+      try {
+        const isFollowed = (await Follow.exists({
+          follower: { id: follower },
+          following: { id: following },
+        }))
+          ? true
+          : false;
+        return isFollowed;
+      } catch (err) {
+        throw new Error("Error checking if followed");
       }
     },
   },
@@ -335,7 +413,10 @@ const resolvers = {
           throw new Error("Comment not found");
         }
         const userInfo = await getUserCache(userId);
-        const likedByUser = !(await Like.exists({ on: commentId, by: userId }));
+        const likedByUser = !(await Like.exists({
+          on: commentId,
+          by: userId,
+        }));
         const dislikedByUser = !(await Dislike.exists({
           on: commentId,
           by: userId,

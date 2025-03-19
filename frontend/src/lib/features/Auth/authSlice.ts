@@ -6,12 +6,12 @@ interface AuthState {
     username: string | null;
     profilePicture: string | null;
   } | null;
-  token: string | null;
+  token: string | null; // Not persisted for security reasons
 }
 
 const initialState: AuthState = {
   user: null,
-  token: null,
+  token: null, // Tokens should not be persisted
 };
 
 const authSlice = createSlice({
@@ -29,7 +29,5 @@ const authSlice = createSlice({
   },
 });
 
-const authReducer = authSlice.reducer;
-
 export const { login, logout } = authSlice.actions;
-export default authReducer;
+export default authSlice.reducer;

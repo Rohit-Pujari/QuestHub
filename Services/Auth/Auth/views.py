@@ -138,4 +138,26 @@ class GetUserInfo(APIView):
             return Response({"user": user_data}, status=status.HTTP_200_OK)
         except UserModel.DoesNotExist:
             return Response({"exists": False}, status=status.HTTP_404_NOT_FOUND)
-        
+
+
+class UpdateUserInfo(APIView):
+    permission_classes = [permissions.AllowAny]
+    def post(self, request):
+        userid = request.GET.get('userId',None)
+        if not userid:
+            return Response({"error":"userId is Required"},status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = UserModel.objects.get(id=userid)
+            user.username = request.data.get('username', user.username)
+            user.email = request.data.get('email', user.email)
+            user.profile_picture = request.data.get('profile_picture', user.profile_picture)
+            user.save()
+            user_data = {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "profile_picture":user.profile_picture
+            }
+            return Response({"user": user_data}, status=status.HTTP_200_OK)
+        except UserModel.DoesNotExist:
+            return Response({"exists": False}, status=status.HTTP_404_NOT_FOUND)

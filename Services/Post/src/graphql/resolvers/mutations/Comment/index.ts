@@ -12,7 +12,7 @@ const addComment = async (
       throw new Error("Post not found");
     }
     if (parentId) {
-      const checkComment = await Comment.exists({ id: parentId });
+      const checkComment = await Comment.findById(parentId);
       if (!checkComment) {
         throw new Error("Parent comment not found");
       }
@@ -21,12 +21,13 @@ const addComment = async (
       content: content,
       associatedTo: postId,
       createdBy: { id: userId },
-      parentId: parentId,
+      parentId: parentId || "",
       likeCount: 0,
       dislikeCount: 0,
     });
     return comment.save();
   } catch (err) {
+    console.log(err);
     throw new Error("Failed to add comment");
   }
 };

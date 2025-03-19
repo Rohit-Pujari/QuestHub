@@ -26,11 +26,13 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({ fetchMoreData, hasMore,
             observer.observe(observerRef.current);
         }
 
-        return () => observer.disconnect();
+        return () => {
+            observer.disconnect();
+        }
     }, [hasMore, isFetching]);
 
     return (
-        <div>
+        <div className="w-full overflow-y-auto">
             {children}
             {hasMore && (
                 <div ref={observerRef} className="text-center p-4 text-gray-500 dark:text-gray-400">

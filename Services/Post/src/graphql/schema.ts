@@ -67,8 +67,11 @@ const typeDefs = `
       limit: Int!
       skip: Int
     ): [Comment!]!
-    getFollowers(userId: ID!,limit:Int!,skip:Int): [User!]!
-    getFollowing(userId: ID!,limit:Int!,skip:Int): [User!]!
+    getFollowers(profileId: ID!,userId:ID!,limit:Int!,skip:Int): [User!]!
+    getFollowing(profileId: ID!,userId: ID!,limit:Int!,skip:Int): [User!]!
+    getFollowersCount(profileId: ID!): Int!
+    getFollowingCount(profileId: ID!): Int!
+    isFollowed(follower:ID!,following:ID!):Boolean!
   }
   type Mutation {
     createPost(

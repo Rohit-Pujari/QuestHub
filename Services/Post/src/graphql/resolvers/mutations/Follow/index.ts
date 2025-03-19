@@ -2,6 +2,8 @@ import { Follow } from "../../../../models";
 
 const addFollow = async (follower: string, following: string) => {
   try {
+    if (follower === following)
+      throw new Error("Error performing follow operation");
     const check = await Follow.findOne({
       follower: { id: follower },
       following: { id: following },

@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { SideBarItems } from '@/constants';
 import { usePathname } from 'next/navigation';
 import GlobalAlert from '@/lib/context/GlobalAlert';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/lib/store';
 
 interface NavigationProps {
     children: React.ReactNode
@@ -41,6 +43,8 @@ interface NavBarProps {
     setMobileMenu: (prev: boolean) => void;
 }
 const NavBar: React.FC<NavBarProps> = ({ mobileMenu, setMobileMenu }) => {
+    const user = useSelector((state: RootState) => state.auth.user);
+    if (!user) return
     return (
         <nav className='flex z-50 items-center justify-between p-4 bg-gray-700 dark:bg-black text-white shadow-lg'>
             <div className='flex sm:hidden items-center space-x-4'>
@@ -58,9 +62,12 @@ const NavBar: React.FC<NavBarProps> = ({ mobileMenu, setMobileMenu }) => {
                         <FontAwesomeIcon icon={faSearch} height={20} width={20} />
                     </button>
                 </div>
-                <section className='hover:bg-gray-500 dark:hover:bg-gray-700 p-2 rounded-lg'>
-                    <FontAwesomeIcon icon={faUserAlt} height={20} width={20} size='lg' />
-                </section>
+                <Link href={`/profile/${user.id}`} className='hover:bg-gray-500 dark:hover:bg-gray-700 p-2 rounded-lg'>
+                    {user?.profilePicture ?
+                        (<img src={user.profilePicture} className='w-8 h-8 rounded-full' />) :
+                        (<FontAwesomeIcon icon={faUserAlt} height={20} width={20} size='lg' />)
+                    }
+                </Link>
             </div>
         </nav>
     )
@@ -91,13 +98,13 @@ const Navigation: React.FC<NavigationProps> = ({ children }) => {
     return (
         <main>
             <NavBar mobileMenu={mobileMenu} setMobileMenu={setMobileMenu} />
-            <main className='flex'>
+            <main className='flex overflow-y-auto'>
                 {/* sidebar */}
                 <aside className={`${mobileMenu ? 'block' : 'hidden'} sm:flex flex-col h-screen overflow-hidden w-64 bg-gray-700 dark:bg-black`}>
                     <Sidebar setMobileMenu={setMobileMenu} mobileMenu={mobileMenu} />
                 </aside>
                 {/* main content */}
-                <section className='w-screen h-screen p-4 items-center bg-white dark:bg-gray-500 '>
+                <section className='w-screen min-h-screen p-4 items-center bg-white dark:bg-slate-900 overflow-y-auto'>
                     <GlobalAlert />
                     {children}
                 </section>

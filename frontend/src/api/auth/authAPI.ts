@@ -1,4 +1,6 @@
+import { IUser } from "@/types";
 import axios from "axios";
+import { isFollowedAPI } from "../post/postAPI";
 
 const base_url = process.env.API_URL
   ? `${process.env.API_URL}auth`
@@ -41,4 +43,17 @@ const checkEmailAPI = async (email: string) => {
   return await authAPI.get(`/check-email/?email=${email}`);
 };
 
-export { loginAPI, signUpAPI, logoutAPI, checkUserNameAPI, checkEmailAPI };
+const getUserInfoAPI = async (id: string): Promise<IUser | null> => {
+  const response = await authAPI.get(`user-info/?userId=${id}`);
+  if (!response.data?.user) throw new Error("User not found");
+  return response.data.user;
+};
+
+export {
+  loginAPI,
+  signUpAPI,
+  logoutAPI,
+  checkUserNameAPI,
+  checkEmailAPI,
+  getUserInfoAPI,
+};

@@ -1,9 +1,9 @@
-import postAPI from '@/api/post/postAPI';
+import { dislikeAPI, likeAPI, undoDislikeAPI, undoLikeAPI } from '@/api/post/postAPI';
 import { useAlert } from '@/lib/context/AlertContext';
 import { RootState } from '@/lib/store';
 import { faThumbsDown, faThumbsUp } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 interface LikeDislikeViewProps {
@@ -19,49 +19,37 @@ const LikeDislikeView: React.FC<LikeDislikeViewProps> = ({ on, likeCount: initia
     const { setAlert } = useAlert();
 
     // State to dynamically update likes, dislikes, and user interactions
-    const [likeCount, setLikeCount] = useState(initialLikes);
-    const [dislikeCount, setDislikeCount] = useState(initialDislikes);
-    const [userLikes, setUserLikes] = useState(initialUserLikes);
-    const [userDislikes, setUserDislikes] = useState(initialUserDislikes);
+    const [likeCount, setLikeCount] = useState<number>(initialLikes);
+    const [dislikeCount, setDislikeCount] = useState<number>(initialDislikes);
+    const [userLikes, setUserLikes] = useState<boolean>();
+    const [userDislikes, setUserDislikes] = useState<boolean>();
 
     const handleLike = async () => {
         if (!userId) return setAlert({ message: 'You must be logged in to like posts.', type: 'error' });
 
-        let payload;
         let newLikeCount = likeCount;
         let newDislikeCount = dislikeCount;
-
-        if (userLikes) {
-            // Undo like
-            payload = {
-                query: `mutation undoLike($on: ID!, $likedBy: ID!){ undoLike(on: $on, likedBy: $likedBy) }`,
-                variables: { on, likedBy: userId }
-            };
-            newLikeCount -= 1;
-            setUserLikes(false);
-        } else {
-            // Like the post
-            payload = {
-                query: `mutation like($on: ID!, $likedBy: ID!){ like(on: $on, likedBy: $likedBy) }`,
-                variables: { on, likedBy: userId }
-            };
-            newLikeCount += 1;
-            setUserLikes(true);
-
+        try {
+            if (userLikes) {
+                // Undo like
+                const response = await undoLikeAPI(on, userId);
+                if (!response) return setAlert({ message: 'Error undoing like', type: 'error' });
+                newLikeCount -= 1;
+                setUserLikes(false);
+            }
             if (userDislikes) {
+                const response = await undoDislikeAPI(on, userId);
+                if (!response) return setAlert({ message: 'Error liking post', type: 'error' })
                 newDislikeCount -= 1;
                 setUserDislikes(false);
             }
-        }
-
-        try {
-            const response = await postAPI.post("/", payload);
-            if (response.data?.data) {
-                setLikeCount(newLikeCount);
-                setDislikeCount(newDislikeCount);
-            } else {
-                setAlert({ message: 'Error updating like status', type: 'error' });
-            }
+            // Like the post
+            const response = await likeAPI(on, userId);
+            if (!response) return setAlert({ message: 'Error liking post', type: 'error' });
+            newLikeCount += 1;
+            setUserLikes(true);
+            setLikeCount(newLikeCount);
+            setDislikeCount(newDislikeCount);
         } catch (error) {
             setAlert({ message: 'Error liking post', type: 'error' });
         }
@@ -69,47 +57,45 @@ const LikeDislikeView: React.FC<LikeDislikeViewProps> = ({ on, likeCount: initia
 
     const handleDislike = async () => {
         if (!userId) return setAlert({ message: 'You must be logged in to dislike posts.', type: 'error' });
-
-        let payload;
         let newLikeCount = likeCount;
         let newDislikeCount = dislikeCount;
-
-        if (userDislikes) {
-            // Undo dislike
-            payload = {
-                query: `mutation undoDislike($on: ID!, $dislikedBy: ID!){ undoDislike(on: $on, dislikedBy: $dislikedBy) }`,
-                variables: { on, dislikedBy: userId }
-            };
-            newDislikeCount -= 1;
-            setUserDislikes(false);
-        } else {
-            // Dislike the post
-            payload = {
-                query: `mutation dislike($on: ID!, $dislikedBy: ID!){ dislike(on: $on, dislikedBy: $dislikedBy) }`,
-                variables: { on, dislikedBy: userId }
-            };
-            newDislikeCount += 1;
-            setUserDislikes(true);
-
+        try {
+            if (userDislikes) {
+                // Undo dislike
+                const response = await undoDislikeAPI(on, userId);
+                if (!response) return setAlert({ message: 'Error undoing dislike', type: 'error' });
+                newDislikeCount -= 1;
+                setUserDislikes(false);
+            }
             if (userLikes) {
+                const response = await undoLikeAPI(on, userId);
+                if (!response) return setAlert({ message: 'Error undoing like', type: 'error' });
                 newLikeCount -= 1;
                 setUserLikes(false);
             }
-        }
-
-        try {
-            const response = await postAPI.post("/", payload);
-            if (response.data?.data) {
-                setLikeCount(newLikeCount);
-                setDislikeCount(newDislikeCount);
-            } else {
-                setAlert({ message: 'Error updating dislike status', type: 'error' });
-            }
+            // Dislike the post
+            const response = await dislikeAPI(on, userId);
+            if (!response) setAlert({ message: " Error Disliking", type: 'error' })
+            newDislikeCount += 1;
+            setUserDislikes(true);
+            setDislikeCount(newDislikeCount);
+            setLikeCount(newLikeCount);
         } catch (error) {
             setAlert({ message: 'Error disliking post', type: 'error' });
         }
     };
-
+    useEffect(() => {
+        setLikeCount(initialLikes);
+        setDislikeCount(initialDislikes);
+        setUserLikes(initialUserLikes);
+        setUserDislikes(initialUserDislikes);
+        return () => {
+            setDislikeCount(0);
+            setLikeCount(0);
+            setUserDislikes(false);
+            setUserLikes(false);
+        }
+    }, [on, initialLikes, initialDislikes, initialUserLikes, initialUserDislikes])
     return (
         <div className="flex items-center space-x-6 mt-4">
             {/* Like Button */}
