@@ -133,7 +133,8 @@ class GetUserInfo(APIView):
                 "id": user.id,
                 "username": user.username,
                 "email": user.email,
-                "profile_picture":user.profile_picture
+                "profile_picture":user.profile_picture,
+                "bio": user.bio
             }
             return Response({"user": user_data}, status=status.HTTP_200_OK)
         except UserModel.DoesNotExist:
@@ -143,15 +144,32 @@ class GetUserInfo(APIView):
 class UpdateUserInfo(APIView):
     permission_classes = [permissions.AllowAny]
     def post(self, request):
-        userid = request.GET.get('userId',None)
+        userid = request.data.get('userId')
         if not userid:
             return Response({"error":"userId is Required"},status=status.HTTP_400_BAD_REQUEST)
         try:
             user = UserModel.objects.get(id=userid)
-            user.username = request.data.get('username', user.username)
-            user.email = request.data.get('email', user.email)
-            user.profile_picture = request.data.get('profile_picture', user.profile_picture)
-            user.save()
+            if not user:
+                return Response({"exists": False}, status=status.HTTP_404_NOT_FOUND)
+            username = request.data.get('username', user.username)
+            email = request.data.get('email', user.email)
+            profile_picture = request.data.get('profile_picture', user.profile_picture)
+            bio = request.data.get('bio', user.bio)
+            updated_fields = []
+            if user.username != username:
+                user.username = username
+                updated_fields.append('username')
+            if user.email != email:
+                user.email = email
+                updated_fields.append('email')
+            if user.profile_picture != profile_picture:
+                user.profile_picture = profile_picture
+                updated_fields.append('profile_picture')
+            if user.bio != bio:
+                user.bio = bio
+                updated_fields.append('bio')
+            if updated_fields:
+                user.save(update_fields=updated_fields)
             user_data = {
                 "id": user.id,
                 "username": user.username,
@@ -161,3 +179,19 @@ class UpdateUserInfo(APIView):
             return Response({"user": user_data}, status=status.HTTP_200_OK)
         except UserModel.DoesNotExist:
             return Response({"exists": False}, status=status.HTTP_404_NOT_FOUND)
+        
+
+class GetUsers(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        username = request.GET.get("username", "").strip() 
+
+        if not username:
+            return Response({"users": []}, status=status.HTTP_200_OK)
+
+        users = UserModel.objects.filter(username__icontains=username).values(
+            "id", "username", "email", "profile_picture"
+        )
+
+        return Response({"users": list(users)}, status=status.HTTP_200_OK)

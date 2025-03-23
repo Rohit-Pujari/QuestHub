@@ -1,10 +1,6 @@
-import { IUser } from "@/types";
 import axios from "axios";
-import { isFollowedAPI } from "../post/postAPI";
 
-const base_url = process.env.API_URL
-  ? `${process.env.API_URL}auth`
-  : "http://localhost:3001/auth";
+const base_url = process.env.NEXT_PUBLIC_API_URL! + "auth/";
 
 const authAPI = axios.create({ baseURL: base_url, withCredentials: true });
 
@@ -43,10 +39,41 @@ const checkEmailAPI = async (email: string) => {
   return await authAPI.get(`/check-email/?email=${email}`);
 };
 
-const getUserInfoAPI = async (id: string): Promise<IUser | null> => {
+const getUserInfoAPI = async (id: string) => {
   const response = await authAPI.get(`user-info/?userId=${id}`);
   if (!response.data?.user) throw new Error("User not found");
   return response.data.user;
+};
+
+const queryUsersAPI = async (query: string) => {
+  const response = await authAPI.get(`/user?username=${query}`);
+  if (response.status == 200) return response.data.users;
+  return [];
+};
+
+const updateUserInfoAPI = async (
+  id: string,
+  username: string,
+  email: string,
+  bio: string,
+  profile_picture: string
+) => {
+  try {
+    const payload = {
+      userId: id,
+      username: username,
+      email: email,
+      bio: bio,
+      profile_picture: profile_picture,
+    };
+    const response = await authAPI.post("update-user-info/", payload);
+    console.log(response);
+    if (response.status == 200) return response.data.user;
+    throw new Error("Error updating user info");
+  } catch (err) {
+    console.log(err);
+    throw new Error("Error updating user info");
+  }
 };
 
 export {
@@ -56,4 +83,6 @@ export {
   checkUserNameAPI,
   checkEmailAPI,
   getUserInfoAPI,
+  queryUsersAPI,
+  updateUserInfoAPI,
 };

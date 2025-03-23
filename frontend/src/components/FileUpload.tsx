@@ -18,9 +18,8 @@ const FileUpload: React.FC<FileUploadProps> = ({ progress, setFile }) => {
     };
     return (
         <section className='flex flex-col mb-4 gap-1'>
-            <label className='text-lg text-gray-600 font-semibold mb-1'>Media (Image/Video)</label>
-            <input className='' type="file" accept='image/*, video/*' onChange={onFileChange} />
-
+            <label className='text-lg  font-semibold text-white mb-1'>Media (Image/Video)</label>
+            <input className='text-white' type="file" accept='image/*, video/*' onChange={onFileChange} />
             {progress > 0 && (
                 <div className="w-full h-6 bg-gray-200 overflow-hidden border rounded-full border-gray-300 mt-2">
                     <div

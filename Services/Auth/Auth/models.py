@@ -6,3 +6,4 @@ import uuid
 class CustomUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     profile_picture = models.CharField(default='', max_length=1000)
+    bio = models.CharField(default='', max_length=500)

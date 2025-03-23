@@ -61,16 +61,16 @@ const ViewPost: React.FC<ViewPostProps> = ({ id }) => {
     console.log(post?.createdBy);
 
     return (
-        <div className="flex flex-col m-4 p-4 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-md transition-all">
+        <div >
             {post ? (
                 <div>
-                    <div >
+                    <div className="flex flex-col m-4 p-4 rounded-lg border  border-gray-300 dark:border-gray-700 bg-gray-700 dark:bg-[#1a1a2e] shadow-md transition-all">
                         {/* User Info */}
                         <UserBox user={post.createdBy} />
                         {/* Title */}
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">{post.title}</h1>
+                        <h1 className="text-2xl font-bold text-white dark:text-gray-100 mb-4">{post.title}</h1>
                         {/* Content */}
-                        <div className="text-gray-800 dark:text-gray-300 text-base leading-relaxed">
+                        <div className="text-white dark:text-gray-300 text-base leading-relaxed">
                             <div dangerouslySetInnerHTML={{ __html: post.content }} />
                         </div>
                         {/* Image (if available) */}

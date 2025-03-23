@@ -30,7 +30,7 @@ const TextEditor: React.FC<TextEditorProps> = ({ content, setContent }) => {
                     { value: 'Email', title: 'Email' },
                 ],
             }}
-            value={content}
+            initialValue={content}
             onEditorChange={(value) => setContent(value)}
         />
     )

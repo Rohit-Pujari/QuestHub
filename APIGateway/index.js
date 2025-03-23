@@ -24,7 +24,17 @@ const authenticateRequest = (req, res, next) => {
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://192.168.29.244:3000"],
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "http://192.168.29.244:3000",
+      ];
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, origin);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
@@ -45,6 +55,15 @@ app.use(
   createProxyMiddleware({
     target: process.env.POST_SERVICE_URL,
     changeOrigin: true,
+  })
+);
+
+app.use(
+  "/ws",
+  createProxyMiddleware({
+    target: process.env.MESSAGE_SERVICE_URL,
+    changeOrigin: true,
+    ws: true,
   })
 );
 

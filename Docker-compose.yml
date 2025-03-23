@@ -16,13 +16,14 @@ services:
   api-gateway:
     build:
       context: ./APIGateway
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     container_name: QuestHub-APIGateway
     ports:
       - "3001:3001"
     environment:
       - AUTH_SERVICE_URL=http://QuestHub-Auth:8000/auth/
       - POST_SERVICE_URL=http://QuestHub-Post:8001/graphql/
+      - MESSAGE_SERVICE_URL=ws://QuestHub-Message:8002/
       - JWT_PUBLIC_KEY=/Secrets/public.key
     volumes:
       - ./APIGateway:/app
@@ -33,7 +34,7 @@ services:
   auth-service:
     build:
       context: ./Services/Auth
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     container_name: QuestHub-Auth
     ports:
       - "8000:8000"
@@ -69,7 +70,7 @@ services:
   post-service:
     build:
       context: ./Services/Post
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     container_name: QuestHub-Post
     ports:
       - "8001:8001"
@@ -83,6 +84,21 @@ services:
     depends_on:
       - PostDB
       - Cache
+
+  mesage-service:
+    build:
+      context: ./Services/Messaging
+      dockerfile: dockerfile
+    container_name: QuestHub-Message
+    ports:
+      - "8002:8002"
+    environment:
+      - MONGO_URI=mongodb://root:root@QuestHub-PostDB:27017/QuestHub-Post?authSource=admin
+      - PORT=8002
+    volumes:
+      - ./Services/Messaging:/app
+    depends_on:
+      - PostDB
 
   PostDB:
     image: mongo

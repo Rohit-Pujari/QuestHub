@@ -72,6 +72,7 @@ const typeDefs = `
     getFollowersCount(profileId: ID!): Int!
     getFollowingCount(profileId: ID!): Int!
     isFollowed(follower:ID!,following:ID!):Boolean!
+    query(query: String!,userId:ID!,limit:Int!,skip:Int): [Post!]!
   }
   type Mutation {
     createPost(

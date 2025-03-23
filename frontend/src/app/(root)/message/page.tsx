@@ -1,9 +1,10 @@
+import MessagePage from '@/components/MessagePage'
 import React from 'react'
 
-const MessagePage = () => {
+const Page = () => {
     return (
-        <div>MessagePage</div>
+        <MessagePage />
     )
 }
 
-export default MessagePage
+export default Page

@@ -20,7 +20,6 @@ const CommentBox: React.FC<CommentBoxProps> = ({ comment, onDelete }) => {
     const [content, setContent] = useState(comment.content);
     const [isEditing, setIsEditing] = useState(false);
     const [isReplying, setIsReplying] = useState(false);
-    const [replyContent, setReplyContent] = useState('');
     const [showReplies, setShowReplies] = useState(false);
     const [replies, setReplies] = useState<ICommentBox[]>(comment.replies);
 
@@ -51,27 +50,34 @@ const CommentBox: React.FC<CommentBoxProps> = ({ comment, onDelete }) => {
     };
 
     return (
-        <div className="flex border-l-2 border-gray-300 dark:border-gray-700 pl-4 my-3">
-            <div className="p-4 m-2 w-full rounded-lg bg-gray-100 dark:bg-gray-800 text-black dark:text-white shadow-md">
-                <div className='flex justify-between'>
+        <div className="flex border-l-2 text-white border-gray-300 dark:border-gray-700 pl-4 my-3 rounded-lg">
+            <div className="p-4 m-2 w-full rounded-lg bg-gray-700 dark:bg-[#1a1a2e] text-black dark:text-white shadow-md">
+                {/* User Info & Actions */}
+                <div className="flex justify-between">
                     <UserBox user={comment.createdBy} />
                     {userId === comment.createdBy.id && (
-                        <div className='flex items-center gap-4'>
+                        <div className="flex items-center gap-4">
                             {isEditing ? (
                                 <>
-                                    <FontAwesomeIcon icon={faCheck} className='cursor-pointer text-green-500' onClick={updateComment} />
-                                    <FontAwesomeIcon icon={faTimes} className='cursor-pointer text-red-500' onClick={() => setIsEditing(false)} />
+                                    <FontAwesomeIcon icon={faCheck} className="cursor-pointer text-green-500" onClick={updateComment} />
+                                    <FontAwesomeIcon icon={faTimes} className="cursor-pointer text-red-500" onClick={() => setIsEditing(false)} />
                                 </>
                             ) : (
                                 <>
-                                    <FontAwesomeIcon icon={faEdit} className='cursor-pointer' onClick={() => setIsEditing(true)} />
-                                    <FontAwesomeIcon icon={faTrash} className='cursor-pointer text-red-500' onClick={deleteComment} />
+                                    <FontAwesomeIcon icon={faEdit} className="cursor-pointer text-gray-300 hover:text-white" onClick={() => setIsEditing(true)} />
+                                    <FontAwesomeIcon icon={faTrash} className="cursor-pointer text-red-500 hover:text-red-700" onClick={deleteComment} />
                                 </>
                             )}
                         </div>
                     )}
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">{new Date(comment.createdAt).toLocaleString()}</div>
+
+                {/* Timestamp */}
+                <div className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                    {new Date(comment.createdAt).toLocaleString()}
+                </div>
+
+                {/* Comment Content or Editable Field */}
                 {isEditing ? (
                     <textarea
                         className="w-full p-2 mt-2 bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none"
@@ -79,7 +85,7 @@ const CommentBox: React.FC<CommentBoxProps> = ({ comment, onDelete }) => {
                         onChange={(e) => setContent(e.target.value)}
                     />
                 ) : (
-                    <p className="text-md mt-2">{content}</p>
+                    <p className="text-md mt-2 text-white">{content}</p>
                 )}
 
                 {/* Like & Dislike */}
@@ -91,7 +97,7 @@ const CommentBox: React.FC<CommentBoxProps> = ({ comment, onDelete }) => {
                     userLikes={comment.likedByUser}
                 />
 
-                {/* Reply Button */}
+                {/* Reply & Toggle Replies Button */}
                 <div className="flex items-center justify-between mt-2">
                     <button
                         className="flex items-center text-blue-500 hover:underline"
@@ -103,7 +109,7 @@ const CommentBox: React.FC<CommentBoxProps> = ({ comment, onDelete }) => {
 
                     {replies.length > 0 && (
                         <button
-                            className="text-sm text-gray-500 hover:underline"
+                            className="text-sm text-gray-500 dark:text-gray-400 hover:underline"
                             onClick={() => setShowReplies(!showReplies)}
                         >
                             {showReplies ? `Hide Replies (${replies.length})` : `View Replies (${replies.length})`}
@@ -113,23 +119,33 @@ const CommentBox: React.FC<CommentBoxProps> = ({ comment, onDelete }) => {
 
                 {/* Reply Input Box */}
                 {isReplying && (
-                    <CreateComment associatedTo={comment.associatedTo} onNewComment={(comment: ICommentBox | IComment) => {
-                        if ('replies' in comment) {
-                            setReplies([...replies, comment]);
-                        }
-                    }} parentId={comment.id} />
+                    <CreateComment
+                        associatedTo={comment.associatedTo}
+                        onNewComment={(newComment: ICommentBox | IComment) => {
+                            if ('replies' in newComment) {
+                                setReplies([...replies, newComment]);
+                            }
+                        }}
+                        parentId={comment.id}
+                    />
                 )}
-                {/* Replies Section (Hidden Until Expanded) */}
+
+                {/* Replies Section */}
                 {showReplies && replies.length > 0 && (
-                    <div className="ml-6 border-l-2 border-gray-300 dark:border-gray-700">
-                        {replies.map(reply => (
-                            <CommentBox key={reply.id} comment={reply} onDelete={(id: string) => setReplies(replies.filter(reply => reply.id !== id))} />
+                    <div className="ml-6 border-l-2 border-gray-300 dark:border-gray-700 pl-3">
+                        {replies.map((reply) => (
+                            <CommentBox
+                                key={reply.id}
+                                comment={reply}
+                                onDelete={(id: string) => setReplies(replies.filter((reply) => reply.id !== id))}
+                            />
                         ))}
                     </div>
                 )}
             </div>
         </div>
     );
+
 };
 
 export default CommentBox;

@@ -70,11 +70,11 @@ const CreatePost: React.FC<CreatePostProps> = ({ }) => {
     return (
         <form
             onSubmit={handleSubmit}
-            className='flex flex-col gap-2 bg-white border border-gray-300 rounded-lg shadow-lg p-6'
+            className='flex flex-col gap-2 bg-gray-800  dark:bg-gray-900 border  border-gray-300 rounded-lg shadow-lg p-6'
         >
-            <h1 className="text-2xl font-semibold text-gray-800 mb-4 text-center">Create Post</h1>
+            <h1 className="text-2xl font-semibold  mb-4 text-center text-white">Create Post</h1>
             <section className="flex flex-col mb-4">
-                <label htmlFor='title' className="text-lg font-semibold text-gray-600 mb-1">Title</label>
+                <label htmlFor='title' className="text-lg font-semibold  text-white mb-1">Title</label>
                 <input
                     type="text"
                     name="title"
@@ -85,7 +85,7 @@ const CreatePost: React.FC<CreatePostProps> = ({ }) => {
                 />
             </section>
             <section className='flex flex-col mb-4'>
-                <label className='text-lg text-gray-600 font-semibold mb-1'>Content</label>
+                <label className='text-lg  font-semibold text-white mb-1'>Content</label>
                 <TextEditor content={content} setContent={setContent} />
             </section>
             <FileUpload progress={progress} setFile={setFile} />

@@ -224,6 +224,35 @@ const resolvers = {
         throw new Error("Error checking if followed");
       }
     },
+    query: async (
+      _: any,
+      {
+        limit,
+        query,
+        skip,
+        userId,
+      }: { query: string; userId: string; limit: number; skip: number }
+    ) => {
+      try {
+        const postIds = (
+          await Post.find(
+            {
+              $or: [
+                { title: { $regex: query, $options: "i" } }, // Case-insensitive search in title
+                { content: { $regex: query, $options: "i" } }, // Case-insensitive search in content
+              ],
+            },
+            { id: 1 }
+          )
+            .limit(limit)
+            .skip(skip)
+        ).map((post) => post.id);
+        const posts = await getPostsWithDetails(postIds, userId);
+        return posts;
+      } catch (err) {
+        throw new Error("Error querying posts");
+      }
+    },
   },
   Mutation: {
     createPost: async (

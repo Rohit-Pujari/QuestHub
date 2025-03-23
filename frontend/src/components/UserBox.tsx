@@ -28,7 +28,7 @@ const UserBox: React.FC<UserBoxProps> = ({ user }) => {
         }
     }, [user])
     return (
-        <div className="w-full flex justify-center items-center gap-3 text-white">
+        <div className="w-full flex bg-gray-700 dark:bg-[#1a1a2e] rounded-xl justify-center items-center gap-3 text-white p-4">
             {profilePicture ? (
                 <img
                     src={profilePicture}

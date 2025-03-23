@@ -32,7 +32,7 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({ fetchMoreData, hasMore,
     }, [hasMore, isFetching]);
 
     return (
-        <div className="w-full overflow-y-auto">
+        <div className="w-full overflow-y-auto custom-scrollbar">
             {children}
             {hasMore && (
                 <div ref={observerRef} className="text-center p-4 text-gray-500 dark:text-gray-400">
@@ -41,6 +41,7 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({ fetchMoreData, hasMore,
             )}
         </div>
     );
+
 };
 
 export default InfiniteScroll;

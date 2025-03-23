@@ -10,4 +10,5 @@ urlpatterns = [
     path("check-email/",CheckEmailView.as_view(), name="check-email"),
     path("user-info/",GetUserInfo.as_view(), name="user-info"),
     path("update-user-info/",UpdateUserInfo.as_view(), name="update-user-info"),
+    path("user/",GetUsers.as_view(), name="user"),
 ]

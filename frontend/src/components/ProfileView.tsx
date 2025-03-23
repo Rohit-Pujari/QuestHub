@@ -20,6 +20,10 @@ import ListFollows from "./ListFollows";
 import ListPosts from "./ListPosts";
 import ListComments from "./ListComments";
 import Modal from "./Modal";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser } from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
+import FollowBox from "./FollowBox";
 
 interface ProfileViewProps {
     id: string;
@@ -28,21 +32,15 @@ interface ProfileViewProps {
 const ProfileView: React.FC<ProfileViewProps> = ({ id }) => {
     const user = useSelector((state: RootState) => state.auth.user);
     const [userProfile, setUserProfile] = useState<IUser | null>(null);
-    const [followers, setFollowers] = useState<IUser[]>([]);
-    const [following, setFollowing] = useState<IUser[]>([]);
     const [followersCount, setFollowersCount] = useState(0);
     const [followingCount, setFollowingCount] = useState(0);
     const [isFollowersOpen, setIsFollowersOpen] = useState(false);
     const [isFollowingOpen, setIsFollowingOpen] = useState(false);
-    const [hasMoreFollowers, setHasMoreFollowers] = useState(true);
-    const [hasMoreFollowing, setHasMoreFollowing] = useState(true);
     const [posts, setPosts] = useState<IPost[]>([]);
     const [comments, setComments] = useState<IComment[]>([]);
     const [hasMorePosts, setHasMorePosts] = useState(true);
     const [hasMoreComments, setHasMoreComments] = useState(true);
     const [activeTab, setActiveTab] = useState<"posts" | "comments">("posts");
-    const followersRef = useRef(1);
-    const followingRef = useRef(1);
     const postsRef = useRef(1);
     const commentsRef = useRef(1);
     const { setAlert } = useAlert();
@@ -54,7 +52,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ id }) => {
         try {
             const [fetchedProfile, isFollowed, followCount, followingCount] = await Promise.all([
                 getUserInfoAPI(id),
-                isFollowedAPI(id, user.id),
+                isFollowedAPI(user.id, id),
                 getFollowersCountAPI(id),
                 getFollowingCountAPI(id),
             ]);
@@ -110,38 +108,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({ id }) => {
         }
     };
 
-    const loadFollowers = async () => {
-        if (!user.id) return
-        try {
-            const skip = (followersRef.current - 1) * 10;
-            const followers = await getFollowersAPI(id, user.id, skip);
-            if (followers) {
-                setFollowers(followers);
-                setHasMoreFollowers(followers.length > 0);
-                followersRef.current += 1
-            } else {
-                setAlert({ message: "Error Fetching Followers", type: "error" });
-            }
-        } catch (err) {
-            setAlert({ message: "Error Fetching Followers", type: "error" });
-        }
-    }
-    const loadFollowing = async () => {
-        if (!user.id) return
-        try {
-            const skip = (followingRef.current - 1) * 10;
-            const following = await getFollowingAPI(id, user.id, skip);
-            if (following) {
-                setFollowing(following);
-                setHasMoreFollowing(following.length > 0);
-                followingRef.current += 1
-            } else {
-                setAlert({ message: "Error Fetching Following", type: "error" });
-            }
-        } catch (err) {
-            setAlert({ message: "Error Fetching Following", type: "error" });
-        }
-    }
     useEffect(() => {
         loadProfileAndCounts();
     }, [id]);
@@ -154,10 +120,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({ id }) => {
     }, [id]);
 
     useEffect(() => {
-        setFollowers([]);
-        setFollowing([]);
-        followersRef.current = 1;
-        followingRef.current = 1;
     }, [id]);
 
     if (!userProfile) {
@@ -171,9 +133,49 @@ const ProfileView: React.FC<ProfileViewProps> = ({ id }) => {
         );
     }
     return (
-        <div className="flex flex-col justify-center items-center bg-black p-2 rounded-lg shadow-lg text-white">
+        <div className="flex flex-col justify-center items-center bg-gray-800 dark:bg-black p-2 rounded-lg shadow-lg text-white">
             {/* User Info */}
-            <UserBox user={userProfile} />
+            <div className="w-full flex flex-col sm:flex-row items-center gap-4 bg-gray-800 dark:bg-black p-4 rounded-xl shadow-md">
+                {/* Profile Picture */}
+                <div className="flex-shrink-0">
+                    {userProfile.profile_picture ? (
+                        <img
+                            src={userProfile.profile_picture}
+                            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-gray-500"
+                            alt="Profile Picture"
+                        />
+                    ) : (
+                        <FontAwesomeIcon
+                            icon={faUser}
+                            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full text-gray-400 bg-gray-700 p-2 border-2 border-gray-500"
+                        />
+                    )}
+                </div>
+
+                {/* User Details */}
+                <div className="w-full flex flex-col sm:flex-row justify-between items-center">
+                    <div>
+                        <Link href={`/profile/${userProfile.id}`} className="text-lg font-semibold text-white hover:text-blue-400 transition">
+                            {userProfile.username}
+                        </Link>
+                        {userProfile.bio && (
+                            <p className="text-sm text-gray-300 dark:text-gray-400 mt-1">
+                                {userProfile.bio}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Follow Button */}
+                    {user.id && id !== user.id && (
+                        <FollowBox
+                            follower={user.id}
+                            following={userProfile.id}
+                            isFollowed={userProfile.isFollowed}
+                        />
+                    )}
+                </div>
+            </div>
+
 
             {/* Followers & Following */}
             <div className="flex justify-around w-full my-4">
@@ -193,20 +195,22 @@ const ProfileView: React.FC<ProfileViewProps> = ({ id }) => {
             <div className="flex justify-center w-full my-4">
                 <button
                     onClick={() => setActiveTab("posts")}
-                    className={`px-4 py-2 mx-2 text-lg font-semibold relative hover:text-blue-500 ${activeTab === "posts" ? "text-blue-500" : "text-gray-700"
+                    className={`px-4 py-2 mx-2 text-lg font-semibold relative group hover:text-blue-500 ${activeTab === "posts" ? "text-blue-500" : "text-gray-700"
                         }`}
                 >
                     Posts
+                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 group-hover:w-full h-0.5 bg-blue-500 transition-all"></span>
                     {activeTab === "posts" && (
                         <span className="absolute bottom-0 left-0 w-full h-1 bg-blue-500"></span>
                     )}
                 </button>
                 <button
                     onClick={() => setActiveTab("comments")}
-                    className={`px-4 py-2 mx-2 text-lg font-semibold relative hover:text-blue-500 ${activeTab === "comments" ? "text-blue-500" : "text-gray-700"
+                    className={`px-4 py-2 mx-2 text-lg font-semibold relative group hover:text-blue-500 ${activeTab === "comments" ? "text-blue-500" : "text-gray-700"
                         }`}
                 >
                     Comments
+                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 group-hover:w-full h-0.5 bg-blue-500 transition-all"></span>
                     {activeTab === "comments" && (
                         <span className="absolute bottom-0 left-0 w-full h-1 bg-blue-500"></span>
                     )}
@@ -224,21 +228,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({ id }) => {
                     getMoreComments={loadComments}
                     hasMore={hasMoreComments}
                 />
-            )}
-            {/* showing followers and following */}
-            {isFollowersOpen && (
-                <Modal onClose={() => setIsFollowersOpen(false)} title="Followers">
-                    <InfiniteScroll fetchMoreData={loadFollowers} hasMore={hasMoreFollowers}>
-                        <ListFollows follows={followers} />
-                    </InfiniteScroll>
-                </Modal>
-            )}
-            {isFollowingOpen && (
-                <Modal onClose={() => setIsFollowingOpen(false)} title="Following">
-                    <InfiniteScroll fetchMoreData={loadFollowing} hasMore={hasMoreFollowing}>
-                        <ListFollows follows={following} />
-                    </InfiniteScroll>
-                </Modal>
             )}
         </div>
     )

@@ -1,9 +1,7 @@
 import { IComment, IPost, IUser } from "@/types";
 import axios from "axios";
 
-const base_url = process.env.API_URL
-  ? `${process.env.API_URL}graphql`
-  : "http://localhost:3001/graphql";
+const base_url = process.env.NEXT_PUBLIC_API_URL! + "graphql/";
 
 const postAPI = axios.create({
   baseURL: base_url,
@@ -445,12 +443,10 @@ const getCommentsByUserAPI = async (
       },
     };
     const response = await postAPI.post("/", payload);
-    console.log(response);
     if (response.data?.data?.getCommentsByUser)
       return response.data.data.getCommentsByUser as IComment[];
     throw new Error("unable to get comments");
   } catch (err) {
-    console.log(err);
     throw new Error("unable to get comments");
   }
 };
@@ -572,10 +568,99 @@ const isFollowedAPI = async (
       },
     };
     const response = await postAPI.post("/", payload);
-    console.log(response);
     return response.data?.data?.isFollowed;
   } catch (err) {
     throw new Error("unable to check if followed");
+  }
+};
+
+const queryPostsAPI = async (
+  userId: string,
+  query: string,
+  skip: number
+): Promise<IPost[]> => {
+  try {
+    const payload = {
+      query: `query query($userId:ID!,$query:String!,$limit:Int!,$skip:Int!){
+        query(userId:$userId,query:$query,limit:$limit,skip:$skip){
+          id
+          title
+          content
+          mediaUrl
+          createdAt
+          createdBy{
+            id
+            username
+            email
+            profile_picture
+            isFollowed
+          }
+          likeCount
+          dislikeCount
+          likedByUser
+          dislikedByUser
+        }
+      }`,
+      variables: {
+        userId: userId,
+        query: query,
+        limit: 10,
+        skip: skip,
+      },
+    };
+    const response = await postAPI.post("/", payload);
+    if (response.data?.data?.query) {
+      return response.data.data.query as IPost[];
+    }
+    throw new Error("unable to query posts");
+  } catch (err) {
+    throw new Error("unable to query posts");
+  }
+};
+
+const deletePostAPI = async (
+  postId: string,
+  userId: string
+): Promise<boolean> => {
+  try {
+    const payload = {
+      query: `mutation deletePost($postId:ID!,$userId:ID!){deletePost(postId:$postId,userId:$userId)}`,
+      variables: { postId: postId, userId: userId },
+    };
+    const response = await postAPI.post("/", payload);
+    if (response.data?.data?.deletePost) return true;
+    return false;
+  } catch (err) {
+    throw new Error("unable to delete post");
+  }
+};
+
+const updatePostAPI = async (
+  postId: string,
+  userId: string,
+  title: string,
+  content: string,
+  mediaUrl: string
+): Promise<string> => {
+  try {
+    const payload = {
+      query: `mutation updatePost($postId:ID!,$userId:ID!,$title:String!,$content:String!,$mediaUrl:String){updatePost(postId:$postId,userId:$userId,title:$title,content:$content,mediaUrl:$mediaUrl){
+        id
+        }}`,
+      variables: {
+        postId: postId,
+        title: title,
+        content: content,
+        mediaUrl: mediaUrl,
+        userId: userId,
+      },
+    };
+    const response = await postAPI.post("/", payload);
+    if (response.data?.data?.updatePost)
+      return response.data.data.updatePost.id;
+    throw new Error("unable to update post");
+  } catch (err) {
+    throw new Error("unable to update post");
   }
 };
 
@@ -600,4 +685,7 @@ export {
   getFollowingCountAPI,
   getPostsByUserAPI,
   isFollowedAPI,
+  queryPostsAPI,
+  updatePostAPI,
+  deletePostAPI,
 };

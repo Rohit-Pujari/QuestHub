@@ -97,15 +97,15 @@ const LikeDislikeView: React.FC<LikeDislikeViewProps> = ({ on, likeCount: initia
         }
     }, [on, initialLikes, initialDislikes, initialUserLikes, initialUserDislikes])
     return (
-        <div className="flex items-center space-x-6 mt-4">
+        <div className="flex items-center space-x-6 mt-4 text-white">
             {/* Like Button */}
             <button
                 onClick={handleLike}
-                className="flex items-center space-x-2 text-gray-700 dark:text-gray-400 font-medium transition"
+                className="flex items-center space-x-2  dark:text-gray-400 font-medium transition hover:text-blue-500"
             >
                 <FontAwesomeIcon
                     icon={faThumbsUp}
-                    color={userLikes ? 'blue' : 'currentColor'}
+                    color={userLikes ? '#3b82f6' : 'currentColor'}
                 />
                 <span>{likeCount}</span>
             </button>
@@ -113,11 +113,11 @@ const LikeDislikeView: React.FC<LikeDislikeViewProps> = ({ on, likeCount: initia
             {/* Dislike Button */}
             <button
                 onClick={handleDislike}
-                className="flex items-center space-x-2 text-gray-700 dark:text-gray-400 font-medium transition"
+                className="flex items-center space-x-2  dark:text-gray-400 font-medium transition hover:text-red-500"
             >
                 <FontAwesomeIcon
                     icon={faThumbsDown}
-                    color={userDislikes ? 'red' : 'currentColor'}
+                    color={userDislikes ? '#ef4444' : 'currentColor'}
                 />
                 <span>{dislikeCount}</span>
             </button>
