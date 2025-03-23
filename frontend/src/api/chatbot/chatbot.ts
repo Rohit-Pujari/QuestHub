@@ -13,7 +13,7 @@ const chatAiAPI = async (prompt: string) => {
   try {
     const payload = {
       prompt: prompt,
-      model: "llama3.1",
+      model: "llama3.2",
       stream: false,
     };
     const response = await chatbotAPI.post("/api/generate", payload);

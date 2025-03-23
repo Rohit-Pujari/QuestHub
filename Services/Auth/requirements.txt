@@ -6,4 +6,3 @@ django-cors-headers
 requests
 mysql
 cryptography
-Pillow
