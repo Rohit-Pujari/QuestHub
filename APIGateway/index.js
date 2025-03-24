@@ -8,20 +8,6 @@ const app = express();
 
 const public_key = fs.readFileSync(process.env.JWT_PUBLIC_KEY, "utf-8");
 
-const authenticateRequest = (req, res, next) => {
-  const authHeader = req.headers["auhtorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-  if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-  jwt.verify(token, public_key, (err) => {
-    if (err) {
-      return res.status(403).json({ message: "Forbidden" });
-    }
-    next();
-  });
-};
-
 app.use(
   cors({
     origin: (origin, callback) => {

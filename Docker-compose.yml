@@ -1,22 +1,6 @@
 version: "3.8"
 
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: QuestHub-Frontend
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-    environment:
-      - NEXT_PUBLIC_API_URL=http://QuestHub-APIGateway:3001/
-      - NEXT_PUBLIC_AI_API_URL=http://QuestHub-Ollama:11434/
-    depends_on:
-      - api-gateway
-      - ollama
-
   api-gateway:
     build:
       context: ./APIGateway
@@ -126,14 +110,6 @@ services:
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - cache_data:/data
-
-  ollama:
-    image: alpine/ollama
-    container_name: QuestHub-Ollama
-    ports:
-      - "11434:11434"
-    command: ["serve"]
-    restart: always
 
 volumes:
   auth_db_data:
